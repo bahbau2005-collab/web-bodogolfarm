@@ -1,29 +1,18 @@
 import { useState } from 'react'
 import { SITE_CONFIG } from '../utils/constants'
 import { apiFetch } from '../utils/api'
+import { Card, Input } from '../components/ui'
 
 /**
- * PENJELASAN CONTACT PAGE:
- * Halaman kontak lengkap dengan:
- * 1. Informasi kontak detail
- * 2. Form kontak
- * 3. Map embed
- * 4. Social media links
+ * Contact — informasi kontak + form pesan (POST /api/contact).
  */
-
 export default function Contact() {
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    subject: '',
-    message: ''
-  })
+  const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' })
   const [loading, setLoading] = useState(false)
   const [status, setStatus] = useState(null)
   const [error, setError] = useState('')
 
-  const handleInputChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target
     setForm((prev) => ({ ...prev, [name]: value }))
   }
@@ -33,12 +22,8 @@ export default function Contact() {
     setLoading(true)
     setStatus(null)
     setError('')
-
     try {
-      await apiFetch('/api/contact', {
-        method: 'POST',
-        body: JSON.stringify(form)
-      })
+      await apiFetch('/api/contact', { method: 'POST', body: JSON.stringify(form) })
       setStatus('success')
       setForm({ name: '', email: '', phone: '', subject: '', message: '' })
     } catch (err) {
@@ -49,243 +34,114 @@ export default function Contact() {
     }
   }
 
+  const INFO = [
+    { label: 'Alamat', value: SITE_CONFIG.location.address },
+    { label: 'Telepon', value: `${SITE_CONFIG.location.phone} (${SITE_CONFIG.company.founder})` },
+    { label: 'Email', value: SITE_CONFIG.location.email },
+    { label: 'Jam Operasional', value: 'Senin – Minggu: 08:00 – 17:00 WIB' },
+  ]
+
   return (
     <div className="w-full">
-
-      {/* HERO SECTION CONTACT */}
-      <section className="bg-gradient-to-r from-purple-600 to-blue-600 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl font-bold mb-6">Hubungi Kami</h1>
-          <p className="text-xl text-purple-100 max-w-3xl mx-auto">
-            Punya pertanyaan tentang program edukasi atau ingin berkunjung ke Bodogol Farm?
-            Jangan ragu untuk menghubungi kami.
+      {/* Hero */}
+      <section className="bg-surface-low py-16">
+        <div className="mx-auto max-w-3xl px-6 text-center">
+          <h1 className="font-heading text-4xl font-bold text-on-surface">Hubungi Kami</h1>
+          <p className="mt-4 text-lg text-on-surface-variant">
+            Punya pertanyaan tentang program edukasi atau ingin berkunjung? Jangan
+            ragu menghubungi kami.
           </p>
         </div>
       </section>
 
-      {/* CONTACT INFO & FORM */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-8">Informasi Kontak</h2>
-              <div className="space-y-6">
-                <div className="flex items-start">
-                  <div className="text-2xl mr-4">??</div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Alamat</h3>
-                    <p className="text-gray-700">{SITE_CONFIG.location.address}</p>
-                  </div>
+      {/* Info + Form */}
+      <section className="py-16">
+        <div className="mx-auto grid max-w-[1280px] gap-10 px-6 lg:grid-cols-2">
+          {/* Info */}
+          <div>
+            <h2 className="font-heading text-2xl font-bold text-on-surface">
+              Informasi Kontak
+            </h2>
+            <div className="mt-6 space-y-5">
+              {INFO.map((i) => (
+                <div key={i.label}>
+                  <p className="text-sm font-semibold text-on-surface">{i.label}</p>
+                  <p className="mt-0.5 text-on-surface-variant">{i.value}</p>
                 </div>
-
-                <div className="flex items-start">
-                  <div className="text-2xl mr-4">??</div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Telepon</h3>
-                    <p className="text-gray-700">{SITE_CONFIG.location.phone}</p>
-                    <p className="text-sm text-gray-600">Nuur Muhammad Ahkam (Founder)</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="text-2xl mr-4">??</div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
-                    <p className="text-gray-700">{SITE_CONFIG.location.email}</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start">
-                  <div className="text-2xl mr-4">??</div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Jam Operasional</h3>
-                    <p className="text-gray-700">Senin - Minggu: 08:00 - 17:00 WIB</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-8">
-                <h3 className="font-semibold text-gray-900 mb-4">Follow Kami</h3>
-                <div className="flex space-x-4">
+              ))}
+            </div>
+            <div className="mt-8">
+              <p className="text-sm font-semibold text-on-surface">Ikuti Kami</p>
+              <div className="mt-3 flex gap-3">
+                {[
+                  { label: 'Instagram', href: SITE_CONFIG.socialMedia.instagram },
+                  { label: 'Facebook', href: SITE_CONFIG.socialMedia.facebook },
+                  { label: 'YouTube', href: SITE_CONFIG.socialMedia.youtube },
+                ].map((s) => (
                   <a
-                    href={SITE_CONFIG.socialMedia.instagram}
+                    key={s.label}
+                    href={s.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-pink-100 hover:bg-pink-200 p-3 rounded-full transition"
+                    className="rounded-lg bg-surface-container px-4 py-2 text-sm font-medium text-on-surface-variant transition-colors hover:bg-surface-high hover:text-primary"
                   >
-                    ??
+                    {s.label}
                   </a>
-                  <a
-                    href={SITE_CONFIG.socialMedia.facebook}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-blue-100 hover:bg-blue-200 p-3 rounded-full transition"
-                  >
-                    f
-                  </a>
-                  <a
-                    href={SITE_CONFIG.socialMedia.youtube}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-red-100 hover:bg-red-200 p-3 rounded-full transition"
-                  >
-                    ??
-                  </a>
-                </div>
+                ))}
               </div>
             </div>
+          </div>
 
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-8">Kirim Pesan</h2>
+          {/* Form */}
+          <Card>
+            <h2 className="font-heading text-2xl font-bold text-on-surface">Kirim Pesan</h2>
 
-              {status === 'success' && (
-                <div className="rounded-2xl bg-green-50 border border-green-200 p-4 mb-6 text-green-700">
-                  Pesan berhasil dikirim. Kami akan segera menghubungi Anda.
-                </div>
-              )}
+            {status === 'success' && (
+              <p className="mt-4 rounded-lg bg-success-container px-4 py-3 text-sm text-on-success-container">
+                Pesan berhasil dikirim. Kami akan segera menghubungi Anda.
+              </p>
+            )}
+            {status === 'error' && (
+              <p className="mt-4 rounded-lg bg-danger-container px-4 py-3 text-sm text-on-danger-container">
+                Gagal mengirim pesan: {error}
+              </p>
+            )}
 
-              {status === 'error' && (
-                <div className="rounded-2xl bg-red-50 border border-red-200 p-4 mb-6 text-red-700">
-                  Gagal mengirim pesan: {error}
-                </div>
-              )}
-
-              <form className="space-y-6" onSubmit={handleSubmit}>
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                    Nama Lengkap *
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={form.name}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="Masukkan nama lengkap Anda"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={form.email}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="email@contoh.com"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                    Nomor Telepon
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={form.phone}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="08123456789"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                    Subjek *
-                  </label>
-                  <select
-                    id="subject"
-                    name="subject"
-                    value={form.subject}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  >
-                    <option value="">Pilih subjek</option>
-                    <option value="info-program">Informasi Program</option>
-                    <option value="booking">Booking Kunjungan</option>
-                    <option value="partnership">Kerjasama</option>
-                    <option value="other">Lainnya</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                    Pesan *
-                  </label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows="5"
-                    value={form.message}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                    placeholder="Tulis pesan Anda di sini..."
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg transition font-semibold disabled:cursor-not-allowed disabled:bg-green-400"
+            <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
+              <Input label="Nama Lengkap" name="name" required value={form.name} onChange={handleChange} placeholder="Nama lengkap Anda" />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Input label="Email" name="email" type="email" required value={form.email} onChange={handleChange} placeholder="email@contoh.com" />
+                <Input label="Nomor Telepon" name="phone" type="tel" value={form.phone} onChange={handleChange} placeholder="08123456789" />
+              </div>
+              <div>
+                <label htmlFor="subject" className="mb-1.5 block text-sm font-medium text-on-surface-variant">
+                  Subjek <span className="text-danger">*</span>
+                </label>
+                <select
+                  id="subject"
+                  name="subject"
+                  required
+                  value={form.subject}
+                  onChange={handleChange}
+                  className="w-full rounded-lg border border-outline-variant bg-surface-lowest px-4 py-2.5 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
                 >
-                  {loading ? 'Mengirim...' : 'Kirim Pesan'}
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* MAP SECTION */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">Lokasi Bodogol Farm</h2>
-
-          <div className="bg-gray-200 h-96 rounded-lg flex items-center justify-center text-gray-500 text-xl mb-6">
-            ??? Google Maps Embed<br />
-            (Interactive Map - {SITE_CONFIG.location.address})
-          </div>
-
-          <div className="text-center">
-            <h3 className="text-xl font-semibold text-gray-900 mb-4">Cara Menuju Bodogol Farm</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <div className="text-3xl mb-3">??</div>
-                <h4 className="font-semibold text-gray-900 mb-2">Dari Jabodetabek</h4>
-                <p className="text-gray-700 text-sm">
-                  Perjalanan 1-2 jam melalui tol Jagorawi atau tol Cikampek. Titik kumpul tersedia di beberapa lokasi.
-                </p>
+                  <option value="">Pilih subjek</option>
+                  <option value="info-program">Informasi Program</option>
+                  <option value="booking">Booking Kunjungan</option>
+                  <option value="partnership">Kerjasama</option>
+                  <option value="other">Lainnya</option>
+                </select>
               </div>
-
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <div className="text-3xl mb-3">??</div>
-                <h4 className="font-semibold text-gray-900 mb-2">Transportasi Umum</h4>
-                <p className="text-gray-700 text-sm">
-                  Naik bus ke terminal Sukabumi, kemudian lanjut dengan angkutan lokal atau taksi online ke lokasi.
-                </p>
-              </div>
-
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <div className="text-3xl mb-3">??</div>
-                <h4 className="font-semibold text-gray-900 mb-2">Layanan Antar-Jemput</h4>
-                <p className="text-gray-700 text-sm">
-                  Kami menyediakan layanan antar-jemput dari titik kumpul terdekat untuk grup dengan minimal peserta tertentu.
-                </p>
-              </div>
-            </div>
-          </div>
+              <Input as="textarea" label="Pesan" name="message" required value={form.message} onChange={handleChange} placeholder="Tulis pesan Anda di sini..." />
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-lg bg-primary py-3 font-medium text-on-primary shadow-soft transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loading ? 'Mengirim…' : 'Kirim Pesan'}
+              </button>
+            </form>
+          </Card>
         </div>
       </section>
     </div>

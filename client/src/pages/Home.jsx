@@ -1,102 +1,148 @@
-import { PILLARS, PROGRAMS, TESTIMONIALS, SITE_CONFIG } from '../utils/constants'
+import { Link } from 'react-router-dom'
+import { PILLARS, PROGRAMS, TESTIMONIALS } from '../utils/constants'
 import HeroSection from '../components/HeroSection'
-import PillarCards from '../components/PillarCards'
-import ProgramPreview from '../components/ProgramPreview'
-import TestimonialCarousel from '../components/TestimonialCarousel'
+import { Card } from '../components/ui'
+import { formatRupiah } from '../utils/format'
 
 /**
- * PENJELASAN HOME PAGE:
- * Home adalah halaman utama website yang menampilkan:
- * 1. Hero Banner - Gambar indah + tagline + CTA
- * 2. About Section - Perkenalan singkat
- * 3. Pillar Cards - 6 pilar manajemen dalam grid
- * 4. Program Preview - 3-4 program unggulan
- * 5. Testimonial - Review peserta
- * 6. CTA Booking - Call-to-action untuk booking
- * 
- * Flow: User landing → lihat hero → scroll down → lihat pillar & program → 
- *       lihat testimonial → click booking
+ * Home — halaman utama. Section: Hero, Tentang singkat, 6 Pilar,
+ * Preview Program, Testimoni, CTA Booking. Memakai design system.
  */
-
 export default function Home() {
   return (
     <div className="w-full">
-      
-      {/* 1. HERO SECTION */}
       <HeroSection />
 
-      {/* 2. TENTANG KAMI (SINGKAT) */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto">
-            <h2 className="text-4xl font-bold text-gray-900 mb-6">
-              Tentang Bodogol Farm
-            </h2>
-            <p className="text-lg text-gray-700 mb-4">
-              Bodogol Farm adalah peternakan domba modern yang terintegrasi dengan konsep wisata edukasi. 
-              Kami berlokasi di Desa Purwasari, Sukabumi, dengan suhu ideal (19-31°C) dan sumber hijauan melimpah.
-            </p>
-            <p className="text-lg text-gray-700 mb-6">
-              Misi kami adalah menjadi inspirasi dalam membangun ketahanan pangan nasional melalui sektor peternakan, 
-              sambil membuka ilmu kepada masyarakat luas.
-            </p>
-            <button className="inline-block bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg transition font-semibold">
-              Pelajari Lebih Lanjut →
-            </button>
-          </div>
+      {/* Tentang singkat */}
+      <section className="bg-surface-low py-20">
+        <div className="mx-auto max-w-3xl px-6 text-center">
+          <h2 className="font-heading text-3xl font-bold text-on-surface">
+            Tentang Bodogol Farm
+          </h2>
+          <p className="mt-6 text-lg text-on-surface-variant">
+            Bodogol Farm adalah peternakan domba modern terintegrasi dengan
+            konsep wisata edukasi. Berlokasi di Desa Purwasari, Sukabumi, dengan
+            suhu ideal (19–31°C) dan sumber hijauan melimpah.
+          </p>
+          <p className="mt-4 text-lg text-on-surface-variant">
+            Misi kami: menjadi inspirasi membangun ketahanan pangan nasional
+            lewat sektor peternakan, sambil membuka ilmu kepada masyarakat luas.
+          </p>
+          <Link
+            to="/about"
+            className="mt-8 inline-flex rounded-lg bg-primary px-6 py-3 font-medium text-on-primary shadow-soft transition-colors hover:bg-primary-container"
+          >
+            Pelajari Lebih Lanjut
+          </Link>
         </div>
       </section>
 
-      {/* 3. 6 PILAR MANAJEMEN */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-12">
+      {/* 6 Pilar */}
+      <section className="py-20">
+        <div className="mx-auto max-w-[1280px] px-6">
+          <h2 className="text-center font-heading text-3xl font-bold text-on-surface">
             Keunggulan Kami: 6 Pilar Manajemen
           </h2>
-          <PillarCards pillars={PILLARS} />
-        </div>
-      </section>
-
-      {/* 4. PROGRAM PREVIEW */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-12">
-            Program Edukasi Kami
-          </h2>
-          <ProgramPreview programs={PROGRAMS} />
-          <div className="text-center mt-12">
-            <button className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg transition font-semibold">
-              Lihat Semua Program →
-            </button>
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {PILLARS.map((pilar) => (
+              <Card key={pilar.id} hover>
+                <div className="text-3xl">{pilar.icon}</div>
+                <h3 className="mt-4 font-heading text-lg font-semibold text-on-surface">
+                  {pilar.title}
+                </h3>
+                <p className="mt-2 text-sm text-on-surface-variant">
+                  {pilar.description}
+                </p>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* 5. TESTIMONIAL */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-12">
+      {/* Preview Program */}
+      <section className="bg-surface-low py-20">
+        <div className="mx-auto max-w-[1280px] px-6">
+          <h2 className="text-center font-heading text-3xl font-bold text-on-surface">
+            Program Edukasi Kami
+          </h2>
+          <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {PROGRAMS.map((program) => (
+              <Card key={program.id} padded={false} hover className="overflow-hidden">
+                <div className="aspect-[4/3] w-full bg-surface-high" />
+                <div className="p-5">
+                  <h3 className="font-heading text-base font-semibold text-on-surface">
+                    {program.name}
+                  </h3>
+                  <p className="mt-2 line-clamp-2 text-sm text-on-surface-variant">
+                    {program.description}
+                  </p>
+                  <div className="mt-4 flex items-center justify-between">
+                    <span className="font-semibold text-primary">
+                      {formatRupiah(program.price)}
+                    </span>
+                    <Link
+                      to="/programs"
+                      className="text-sm font-medium text-secondary hover:underline"
+                    >
+                      Detail →
+                    </Link>
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+          <div className="mt-12 text-center">
+            <Link
+              to="/programs"
+              className="inline-flex rounded-lg border border-secondary px-6 py-3 font-medium text-secondary transition-colors hover:bg-secondary-container/40"
+            >
+              Lihat Semua Program
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimoni */}
+      <section className="py-20">
+        <div className="mx-auto max-w-[1280px] px-6">
+          <h2 className="text-center font-heading text-3xl font-bold text-on-surface">
             Testimoni Peserta
           </h2>
-          <TestimonialCarousel testimonials={TESTIMONIALS} />
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {TESTIMONIALS.map((t) => (
+              <Card key={t.id}>
+                <p className="text-on-surface">“{t.text}”</p>
+                <div className="mt-4 text-sm text-amber-500">
+                  {'★'.repeat(t.rating)}
+                </div>
+                <div className="mt-3">
+                  <p className="font-semibold text-on-surface">{t.name}</p>
+                  <p className="text-sm text-on-surface-variant">{t.role}</p>
+                </div>
+              </Card>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* 6. CTA BOOKING - PROMINENT */}
-      <section className="py-20 bg-gradient-to-r from-green-600 to-green-700">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+      {/* CTA Booking */}
+      <section className="bg-primary py-20">
+        <div className="mx-auto max-w-3xl px-6 text-center">
+          <h2 className="font-heading text-3xl font-bold text-on-primary md:text-4xl">
             Siap untuk Petualangan Edukasi?
           </h2>
-          <p className="text-xl text-green-100 mb-8">
-            Bergabunglah dengan ribuan peserta yang telah belajar dan berkembang bersama Bodogol Farm
+          <p className="mt-4 text-lg text-on-primary/80">
+            Bergabunglah dengan peserta lain yang telah belajar dan berkembang
+            bersama Bodogol Farm.
           </p>
-          <button className="bg-white hover:bg-gray-100 text-green-600 px-10 py-4 rounded-lg transition font-bold text-lg">
-            🎯 Booking Sekarang
-          </button>
+          <Link
+            to="/booking"
+            className="mt-8 inline-flex rounded-lg bg-on-primary px-8 py-4 font-semibold text-primary transition-opacity hover:opacity-90"
+          >
+            Booking Sekarang
+          </Link>
         </div>
       </section>
-
     </div>
   )
 }

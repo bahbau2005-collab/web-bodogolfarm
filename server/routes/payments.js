@@ -176,15 +176,23 @@ router.get('/status/:bookingId', async (req, res) => {
       success: true,
       data: {
         bookingId: booking._id,
+        ticketCode: booking.ticketCode,
         paymentStatus: booking.paymentStatus,
         paymentOrderId: booking.paymentOrderId,
         paymentUrl: booking.paymentUrl,
         totalAmount: booking.program.price * booking.participants,
         program: {
           title: booking.program.title,
-          price: booking.program.price
+          price: booking.program.price,
+          duration: booking.program.duration
         },
-        participants: booking.participants
+        participants: booking.participants,
+        adults: booking.adults,
+        children: booking.children,
+        customerName: booking.customerName,
+        customerEmail: booking.customerEmail,
+        customerPhone: booking.customerPhone,
+        bookingDate: booking.bookingDate
       }
     })
 

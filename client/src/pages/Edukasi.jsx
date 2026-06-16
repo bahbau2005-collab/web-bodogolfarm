@@ -1,243 +1,138 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Card, Chip } from '../components/ui'
 
 /**
- * EDUKASI PAGE
- * Halaman edukasi tentang peternakan domba dan manajemen ternak.
- * Berisi artikel edukasi, tips peternakan, dan informasi berguna.
+ * Edukasi — Hub artikel edukasi peternakan. Filter kategori + modal baca.
  */
-
 const EDUKASI_ARTICLES = [
-  {
-    id: 1,
-    title: "Panduan Lengkap Beternak Domba Modern",
-    excerpt: "Pelajari langkah-langkah praktis memulai peternakan domba dari nol hingga menghasilkan.",
-    content: "Peternakan domba modern membutuhkan perencanaan yang matang...",
-    category: "Panduan",
-    readTime: "5 min read",
-    image: "/images/edukasi/domba-modern.jpg"
-  },
-  {
-    id: 2,
-    title: "Pakan Ternak yang Efektif untuk Pertumbuhan Optimal",
-    excerpt: "Strategi pemberian pakan yang tepat untuk meningkatkan produktivitas ternak domba.",
-    content: "Pakan merupakan 70% dari keberhasilan peternakan...",
-    category: "Nutrisi",
-    readTime: "4 min read",
-    image: "/images/edukasi/pakan.jpg"
-  },
-  {
-    id: 3,
-    title: "Manajemen Kesehatan Domba di Peternakan",
-    excerpt: "Cara mencegah dan menangani penyakit umum pada ternak domba.",
-    content: "Kesehatan ternak adalah prioritas utama dalam peternakan modern...",
-    category: "Kesehatan",
-    readTime: "6 min read",
-    image: "/images/edukasi/kesehatan.jpg"
-  },
-  {
-    id: 4,
-    title: "Bisnis Peternakan Domba: Dari Hobi ke Profit",
-    excerpt: "Analisis profitabilitas dan strategi bisnis peternakan domba yang sukses.",
-    content: "Peternakan domba bukan hanya hobi, tapi juga peluang bisnis yang menjanjikan...",
-    category: "Bisnis",
-    readTime: "7 min read",
-    image: "/images/edukasi/bisnis.jpg"
-  },
-  {
-    id: 5,
-    title: "Teknologi Modern dalam Peternakan Domba",
-    excerpt: "Penerapan teknologi IoT dan AI untuk efisiensi peternakan modern.",
-    content: "Teknologi telah merevolusi cara kita mengelola peternakan...",
-    category: "Teknologi",
-    readTime: "5 min read",
-    image: "/images/edukasi/teknologi.jpg"
-  },
-  {
-    id: 6,
-    title: "Sustainability dalam Peternakan Domba",
-    excerpt: "Praktik peternakan berkelanjutan untuk masa depan yang lebih baik.",
-    content: "Peternakan berkelanjutan adalah kunci keberlanjutan lingkungan...",
-    category: "Sustainability",
-    readTime: "4 min read",
-    image: "/images/edukasi/sustainability.jpg"
-  }
+  { id: 1, title: 'Panduan Lengkap Beternak Domba Modern', excerpt: 'Langkah praktis memulai peternakan domba dari nol hingga menghasilkan.', content: 'Peternakan domba modern membutuhkan perencanaan yang matang...', category: 'Panduan', readTime: '5 menit' },
+  { id: 2, title: 'Pakan Ternak yang Efektif untuk Pertumbuhan Optimal', excerpt: 'Strategi pemberian pakan yang tepat untuk meningkatkan produktivitas ternak.', content: 'Pakan merupakan 70% dari keberhasilan peternakan...', category: 'Nutrisi', readTime: '4 menit' },
+  { id: 3, title: 'Manajemen Kesehatan Domba di Peternakan', excerpt: 'Cara mencegah dan menangani penyakit umum pada ternak domba.', content: 'Kesehatan ternak adalah prioritas utama dalam peternakan modern...', category: 'Kesehatan', readTime: '6 menit' },
+  { id: 4, title: 'Bisnis Peternakan Domba: Dari Hobi ke Profit', excerpt: 'Analisis profitabilitas dan strategi bisnis peternakan domba yang sukses.', content: 'Peternakan domba bukan hanya hobi, tapi juga peluang bisnis...', category: 'Bisnis', readTime: '7 menit' },
+  { id: 5, title: 'Teknologi Modern dalam Peternakan Domba', excerpt: 'Penerapan teknologi untuk efisiensi peternakan modern.', content: 'Teknologi telah merevolusi cara kita mengelola peternakan...', category: 'Teknologi', readTime: '5 menit' },
+  { id: 6, title: 'Keberlanjutan dalam Peternakan Domba', excerpt: 'Praktik peternakan berkelanjutan untuk masa depan yang lebih baik.', content: 'Peternakan berkelanjutan adalah kunci keberlanjutan lingkungan...', category: 'Keberlanjutan', readTime: '4 menit' },
 ]
-
-const CATEGORIES = ["Semua", "Panduan", "Nutrisi", "Kesehatan", "Bisnis", "Teknologi", "Sustainability"]
+const CATEGORIES = ['Semua', 'Panduan', 'Nutrisi', 'Kesehatan', 'Bisnis', 'Teknologi', 'Keberlanjutan']
 
 export default function Edukasi() {
-  const [selectedCategory, setSelectedCategory] = useState("Semua")
+  const [selectedCategory, setSelectedCategory] = useState('Semua')
   const [selectedArticle, setSelectedArticle] = useState(null)
 
-  const filteredArticles = selectedCategory === "Semua"
+  const articles = selectedCategory === 'Semua'
     ? EDUKASI_ARTICLES
-    : EDUKASI_ARTICLES.filter(article => article.category === selectedCategory)
+    : EDUKASI_ARTICLES.filter((a) => a.category === selectedCategory)
 
   return (
     <div className="w-full">
-      {/* HERO SECTION */}
-      <section className="bg-gradient-to-r from-green-600 to-green-700 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl font-bold mb-6">
-            Edukasi Peternakan
+      {/* Hero */}
+      <section className="bg-surface-low py-16">
+        <div className="mx-auto max-w-3xl px-6 text-center">
+          <h1 className="font-heading text-4xl font-bold text-on-surface">
+            Hub Edukasi Peternakan
           </h1>
-          <p className="text-xl text-green-100 max-w-3xl mx-auto">
-            Temukan pengetahuan mendalam tentang dunia peternakan domba modern,
-            dari teknik breeding hingga manajemen bisnis yang sukses.
+          <p className="mt-4 text-lg text-on-surface-variant">
+            Pengetahuan mendalam tentang dunia peternakan domba modern — dari
+            teknik breeding hingga manajemen bisnis.
           </p>
         </div>
       </section>
 
-      {/* CATEGORY FILTERS */}
-      <section className="py-8 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap justify-center gap-4">
-            {CATEGORIES.map(category => (
+      {/* Filter kategori */}
+      <section className="py-8">
+        <div className="mx-auto max-w-[1280px] px-6">
+          <div className="flex flex-wrap justify-center gap-3">
+            {CATEGORIES.map((c) => (
               <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-2 rounded-full font-medium transition ${
-                  selectedCategory === category
-                    ? 'bg-green-600 text-white'
-                    : 'bg-white text-gray-700 hover:bg-green-50'
+                key={c}
+                onClick={() => setSelectedCategory(c)}
+                className={`rounded-full px-5 py-2 text-sm font-medium transition-colors ${
+                  selectedCategory === c
+                    ? 'bg-primary text-on-primary'
+                    : 'bg-surface-container text-on-surface-variant hover:bg-surface-high'
                 }`}
               >
-                {category}
+                {c}
               </button>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ARTICLES GRID */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredArticles.map(article => (
-              <article
-                key={article.id}
-                className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer"
-                onClick={() => setSelectedArticle(article)}
-              >
-                {/* Article Image Placeholder */}
-                <div className="h-48 bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center">
-                  <div className="text-6xl opacity-50">📚</div>
-                </div>
-
-                {/* Article Content */}
+      {/* Grid artikel */}
+      <section className="pb-20">
+        <div className="mx-auto max-w-[1280px] px-6">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {articles.map((a) => (
+              <Card key={a.id} padded={false} hover className="overflow-hidden" onClick={() => setSelectedArticle(a)}>
+                <div className="flex aspect-[16/9] items-center justify-center bg-surface-high text-4xl">📚</div>
                 <div className="p-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full">
-                      {article.category}
-                    </span>
-                    <span className="text-sm text-gray-500">
-                      {article.readTime}
-                    </span>
+                  <div className="mb-3 flex items-center justify-between">
+                    <Chip tone="info">{a.category}</Chip>
+                    <span className="text-xs text-on-surface-variant">{a.readTime}</span>
                   </div>
-
-                  <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
-                    {article.title}
+                  <h3 className="line-clamp-2 font-heading text-lg font-semibold text-on-surface">
+                    {a.title}
                   </h3>
-
-                  <p className="text-gray-600 text-sm line-clamp-3">
-                    {article.excerpt}
-                  </p>
-
-                  <div className="mt-4 text-green-600 font-medium text-sm">
-                    Baca Selengkapnya →
-                  </div>
+                  <p className="mt-2 line-clamp-3 text-sm text-on-surface-variant">{a.excerpt}</p>
+                  <p className="mt-4 text-sm font-medium text-secondary">Baca Selengkapnya →</p>
                 </div>
-              </article>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ARTICLE MODAL */}
+      {/* Modal artikel */}
       {selectedArticle && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-8">
-              {/* Modal Header */}
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <span className="text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full mb-3 inline-block">
-                    {selectedArticle.category}
-                  </span>
-                  <h2 className="text-3xl font-bold text-gray-900">
-                    {selectedArticle.title}
-                  </h2>
-                  <p className="text-gray-500 mt-2">
-                    {selectedArticle.readTime}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setSelectedArticle(null)}
-                  className="text-gray-400 hover:text-gray-600 text-2xl"
-                >
-                  ✕
-                </button>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setSelectedArticle(null)}
+        >
+          <div
+            className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl bg-surface-lowest p-8 shadow-soft-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <Chip tone="info">{selectedArticle.category}</Chip>
+                <h2 className="mt-3 font-heading text-2xl font-bold text-on-surface">
+                  {selectedArticle.title}
+                </h2>
+                <p className="mt-1 text-sm text-on-surface-variant">{selectedArticle.readTime}</p>
               </div>
+              <button
+                onClick={() => setSelectedArticle(null)}
+                className="text-2xl text-on-surface-variant hover:text-on-surface"
+              >
+                ✕
+              </button>
+            </div>
 
-              {/* Article Image */}
-              <div className="h-64 bg-gradient-to-br from-green-100 to-green-200 rounded-lg flex items-center justify-center mb-8">
-                <div className="text-8xl opacity-50">📖</div>
+            <div className="mt-6 flex aspect-[16/9] items-center justify-center rounded-lg bg-surface-high text-5xl">
+              📖
+            </div>
+
+            <div className="mt-6 space-y-4 text-on-surface-variant">
+              <p>{selectedArticle.content}</p>
+              <p>
+                Dalam dunia peternakan modern, pengetahuan yang tepat adalah kunci
+                keberhasilan. Artikel ini membahas secara mendalam topik yang Anda pilih.
+              </p>
+              <div className="rounded-lg border-l-4 border-primary bg-success-container/40 p-4 text-sm text-on-success-container">
+                💡 <strong>Tips Bodogol Farm:</strong> Kunjungi peternakan kami untuk
+                melihat implementasi praktis dari teori dalam artikel ini.
               </div>
+            </div>
 
-              {/* Article Content */}
-              <div className="prose prose-lg max-w-none">
-                <p className="text-gray-700 leading-relaxed mb-6">
-                  {selectedArticle.content}
-                </p>
-
-                {/* Sample expanded content */}
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Pendahuluan</h3>
-                <p className="text-gray-700 leading-relaxed mb-6">
-                  Dalam dunia peternakan modern, pengetahuan yang tepat adalah kunci keberhasilan.
-                  Artikel ini akan membahas secara mendalam tentang topik yang Anda pilih.
-                </p>
-
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Langkah-langkah Praktis</h3>
-                <ol className="list-decimal list-inside text-gray-700 leading-relaxed mb-6 space-y-2">
-                  <li>Persiapan dan perencanaan yang matang</li>
-                  <li>Implementasi teknik-teknik terbaik</li>
-                  <li>Monitoring dan evaluasi berkala</li>
-                  <li>Optimasi berdasarkan hasil yang didapat</li>
-                </ol>
-
-                <h3 className="text-2xl font-bold text-gray-900 mb-4">Tips dan Trik</h3>
-                <ul className="list-disc list-inside text-gray-700 leading-relaxed mb-6 space-y-2">
-                  <li>Konsistensi dalam penerapan metode</li>
-                  <li>Pembelajaran berkelanjutan dari praktik</li>
-                  <li>Kolaborasi dengan ahli di bidangnya</li>
-                  <li>Dokumentasi setiap langkah dan hasil</li>
-                </ul>
-
-                <div className="bg-green-50 border-l-4 border-green-400 p-4 my-8">
-                  <p className="text-green-800 font-medium">
-                    💡 <strong>Tips Bodogol Farm:</strong> Kunjungi peternakan kami untuk melihat
-                    implementasi praktis dari teori-teori yang dibahas dalam artikel ini.
-                  </p>
-                </div>
-              </div>
-
-              {/* Call to Action */}
-              <div className="mt-8 pt-8 border-t border-gray-200">
-                <div className="text-center">
-                  <h3 className="text-xl font-bold text-gray-900 mb-4">
-                    Ingin Belajar Lebih Dalam?
-                  </h3>
-                  <p className="text-gray-600 mb-6">
-                    Daftar program edukasi kami dan dapatkan pengalaman langsung di peternakan modern.
-                  </p>
-                  <a
-                    href="/booking"
-                    className="inline-block bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-semibold transition"
-                  >
-                    Booking Program Edukasi
-                  </a>
-                </div>
-              </div>
+            <div className="mt-8 border-t border-outline-variant/60 pt-6 text-center">
+              <p className="text-on-surface-variant">Ingin belajar lebih dalam?</p>
+              <Link
+                to="/booking"
+                className="mt-4 inline-flex rounded-lg bg-primary px-6 py-3 font-medium text-on-primary transition-colors hover:bg-primary-container"
+              >
+                Booking Program Edukasi
+              </Link>
             </div>
           </div>
         </div>

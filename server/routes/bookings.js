@@ -2,6 +2,7 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import Booking from '../models/Booking.js';
 import Program from '../models/Program.js';
+import Schedule from '../models/Schedule.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
 
 const router = express.Router();
@@ -55,7 +56,10 @@ router.post('/', [
   body('customerName').trim().isLength({ min: 1, max: 100 }).withMessage('Name is required and max 100 chars'),
   body('customerEmail').isEmail().normalizeEmail().withMessage('Valid email is required'),
   body('customerPhone').matches(/^[0-9+\-\s()]+$/).withMessage('Valid phone number is required'),
-  body('participants').isNumeric().withMessage('Number of participants must be a number'),
+  body('participants').optional().isNumeric().withMessage('Number of participants must be a number'),
+  body('adults').optional().isInt({ min: 0 }).withMessage('Adults must be a non-negative integer'),
+  body('children').optional().isInt({ min: 0 }).withMessage('Children must be a non-negative integer'),
+  body('schedule').optional().isMongoId().withMessage('Valid schedule ID is required'),
   body('bookingDate').isISO8601().withMessage('Valid booking date is required'),
   body('specialRequests').optional().isLength({ max: 500 }).withMessage('Special requests max 500 chars')
 ], asyncHandler(async (req, res) => {
@@ -69,7 +73,18 @@ router.post('/', [
     });
   }
 
-  const { program: programId, participants, bookingDate } = req.body;
+  const { program: programId, schedule: scheduleId, bookingDate } = req.body;
+  const adults = Number(req.body.adults) || 0;
+  const children = Number(req.body.children) || 0;
+
+  // Total peserta: pakai adults+children kalau dikirim, kalau tidak pakai participants
+  const totalParticipants = (adults + children) || Number(req.body.participants) || 0;
+  if (totalParticipants < 1) {
+    return res.status(400).json({
+      success: false,
+      error: 'Jumlah peserta minimal 1'
+    });
+  }
 
   // Check if program exists and is active
   const program = await Program.findById(programId);
@@ -88,23 +103,48 @@ router.post('/', [
     });
   }
 
-  // Check capacity (simplified - in production, check existing bookings for the date)
-  if (participants > program.capacity) {
+  // Validasi sesi/jadwal + kuota (jika booking pakai sesi)
+  let scheduleDoc = null;
+  if (scheduleId) {
+    scheduleDoc = await Schedule.findById(scheduleId);
+    if (!scheduleDoc || scheduleDoc.status !== 'open') {
+      return res.status(400).json({
+        success: false,
+        error: 'Jadwal tidak tersedia atau sudah ditutup'
+      });
+    }
+    if (scheduleDoc.remaining < totalParticipants) {
+      return res.status(400).json({
+        success: false,
+        error: `Kuota tidak cukup. Sisa kuota: ${scheduleDoc.remaining}`
+      });
+    }
+  } else if (totalParticipants > program.capacity) {
+    // Tanpa sesi: pakai kapasitas program sebagai batas
     return res.status(400).json({
       success: false,
-      error: `Maximum ${program.capacity} participants allowed`
+      error: `Maksimal ${program.capacity} peserta`
     });
   }
 
   // Calculate total amount
-  const totalAmount = program.price * participants;
+  const totalAmount = program.price * totalParticipants;
 
   // Create booking
   const booking = await Booking.create({
     ...req.body,
+    participants: totalParticipants,
+    adults,
+    children,
     totalAmount,
     status: 'pending'
   });
+
+  // Kurangi kuota sesi setelah booking dibuat
+  if (scheduleDoc) {
+    scheduleDoc.booked += totalParticipants;
+    await scheduleDoc.save();
+  }
 
   // Populate program data in response
   await booking.populate('program', 'title duration price');

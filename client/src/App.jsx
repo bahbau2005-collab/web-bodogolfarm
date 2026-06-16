@@ -15,6 +15,7 @@ import AdminLogin from './pages/admin/AdminLogin'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminBookings from './pages/admin/AdminBookings'
 import AdminServices from './pages/admin/AdminServices'
+import AdminSchedules from './pages/admin/AdminSchedules'
 import AdminContent from './pages/admin/AdminContent'
 import AdminReports from './pages/admin/AdminReports'
 import AdminSettings from './pages/admin/AdminSettings'
@@ -26,7 +27,7 @@ function AdminRoute({ children }) {
 
 function CustomerLayout({ children }) {
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-surface">
       <Header />
       <main className="flex-grow">{children}</main>
       <Footer />
@@ -43,6 +44,7 @@ function App() {
         <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
         <Route path="/admin/bookings" element={<AdminRoute><AdminBookings /></AdminRoute>} />
         <Route path="/admin/services" element={<AdminRoute><AdminServices /></AdminRoute>} />
+        <Route path="/admin/schedules" element={<AdminRoute><AdminSchedules /></AdminRoute>} />
         <Route path="/admin/content" element={<AdminRoute><AdminContent /></AdminRoute>} />
         <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
         <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />

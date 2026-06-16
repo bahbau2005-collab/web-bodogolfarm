@@ -1,11 +1,38 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { apiFetch } from '../utils/api'
+import { Card, Chip } from '../components/ui'
+import { formatRupiah } from '../utils/format'
+
+// Label tampilan (enum DB -> Indonesia)
+const TYPE_LABELS = {
+  agrotourism: 'Agrowisata',
+  edukasi: 'Edukasi',
+  training: 'Pelatihan',
+}
+const CATEGORY_LABELS = {
+  family: 'Keluarga',
+  school: 'Sekolah',
+  university: 'Kampus',
+  umum: 'Umum',
+}
+const MODE_LABELS = { offline: 'Offline', online: 'Online' }
+const UNIT_LABELS = {
+  orang: '/orang',
+  paket: '/paket',
+  course: '/course',
+  semester: '/semester',
+}
+
+const TYPE_OPTIONS = ['agrotourism', 'edukasi', 'training']
+const MODE_OPTIONS = ['offline', 'online']
 
 export default function Programs() {
   const [programs, setPrograms] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [typeFilter, setTypeFilter] = useState('all')
+  const [modeFilter, setModeFilter] = useState('all')
 
   useEffect(() => {
     const fetchPrograms = async () => {
@@ -13,98 +40,152 @@ export default function Programs() {
         const response = await apiFetch('/api/programs')
         setPrograms(response.data || [])
       } catch (err) {
-        console.error('Error fetching programs:', err)
-        // Fallback to mock data if API fails
-        setPrograms([
-          {
-            _id: '1',
-            title: 'Edukasi Sekolah',
-            description: 'Program edukasi untuk siswa SD-SMA',
-            duration: '1 hari',
-            price: 200000,
-            capacity: 30,
-            schedule: 'Senin-Jumat',
-            facilities: ['Snack', 'Makan siang', 'Materi']
-          },
-          {
-            _id: '2',
-            title: 'Paket Outing Days',
-            description: 'Wisata edukasi untuk grup/komunitas',
-            duration: '1 hari',
-            price: 350000,
-            capacity: 50,
-            schedule: 'Akhir pekan',
-            facilities: ['Breakfast', 'Makan siang', 'Snack']
-          }
-        ])
+        setError('Gagal memuat program. Pastikan server aktif.')
       } finally {
         setLoading(false)
       }
     }
-
     fetchPrograms()
   }, [])
 
-  console.log('Programs render:', { programs, loading })
-
-  if (loading) {
-    return (
-      <div className="w-full min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Memuat program...</p>
-        </div>
-      </div>
-    )
-  }
+  const filtered = useMemo(() => {
+    return programs.filter((p) => {
+      const okType = typeFilter === 'all' || p.type === typeFilter
+      const okMode = modeFilter === 'all' || p.mode === modeFilter
+      return okType && okMode
+    })
+  }, [programs, typeFilter, modeFilter])
 
   return (
     <div className="w-full">
-      <section className="bg-gradient-to-r from-blue-600 to-green-600 text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-5xl font-bold mb-6">
-            Program Edukasi Bodogol Farm
+      {/* Header halaman */}
+      <section className="bg-surface-low py-16">
+        <div className="mx-auto max-w-[1280px] px-6">
+          <h1 className="font-heading text-4xl font-bold text-on-surface">
+            Layanan Kami
           </h1>
-          <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-            Berbagai program edukasi peternakan
+          <p className="mt-4 max-w-2xl text-lg text-on-surface-variant">
+            Jelajahi berbagai program agrowisata dan pelatihan edukasi. Pesan
+            kunjungan atau daftar program hari ini.
           </p>
         </div>
       </section>
 
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {programs.map((program) => (
-              <div key={program._id} className="bg-white border-2 border-gray-200 rounded-lg overflow-hidden shadow-md hover:shadow-lg transition">
-                <div className="h-64 bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white text-6xl">
-                  📚
-                </div>
-                <div className="p-8">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                    {program.title}
-                  </h3>
-                  <p className="text-gray-700 mb-6 leading-relaxed">
-                    {program.description}
-                  </p>
-                  <div className="space-y-2 mb-6">
-                    <p className="text-sm text-gray-600">Durasi: {program.duration}</p>
-                    <p className="text-sm text-gray-600">Kapasitas: {program.capacity} peserta</p>
-                    <p className="text-2xl font-bold text-green-600">
-                      Rp {program.price.toLocaleString('id-ID')}
-                    </p>
-                  </div>
-                  <Link
-                    to="/booking"
-                    className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-6 rounded-lg transition font-semibold text-center block"
-                  >
-                    Booking Sekarang
-                  </Link>
-                </div>
-              </div>
-            ))}
+      <section className="py-12">
+        <div className="mx-auto max-w-[1280px] px-6">
+          {/* Filter */}
+          <div className="mb-8 flex flex-wrap items-center gap-3">
+            <FilterGroup
+              label="Jenis"
+              value={typeFilter}
+              onChange={setTypeFilter}
+              options={TYPE_OPTIONS}
+              labels={TYPE_LABELS}
+            />
+            <span className="hidden h-6 w-px bg-outline-variant sm:block" />
+            <FilterGroup
+              label="Mode"
+              value={modeFilter}
+              onChange={setModeFilter}
+              options={MODE_OPTIONS}
+              labels={MODE_LABELS}
+            />
           </div>
+
+          {/* State */}
+          {loading && (
+            <div className="py-20 text-center text-on-surface-variant">
+              Memuat program…
+            </div>
+          )}
+          {error && !loading && (
+            <Card className="mx-auto max-w-md text-center">
+              <p className="text-danger">{error}</p>
+            </Card>
+          )}
+          {!loading && !error && filtered.length === 0 && (
+            <div className="py-20 text-center text-on-surface-variant">
+              Tidak ada program untuk filter ini.
+            </div>
+          )}
+
+          {/* Grid program */}
+          {!loading && !error && filtered.length > 0 && (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {filtered.map((program) => (
+                <Card key={program._id} padded={false} hover className="flex flex-col overflow-hidden">
+                  <div className="flex aspect-[4/3] items-center justify-center bg-surface-high text-4xl">
+                    🐑
+                  </div>
+                  <div className="flex flex-1 flex-col p-6">
+                    <div className="mb-3 flex flex-wrap gap-2">
+                      {program.type && (
+                        <Chip tone="info">{TYPE_LABELS[program.type] || program.type}</Chip>
+                      )}
+                      {program.mode && (
+                        <Chip tone="neutral">{MODE_LABELS[program.mode] || program.mode}</Chip>
+                      )}
+                      {program.category && program.category !== 'umum' && (
+                        <Chip tone="neutral">{CATEGORY_LABELS[program.category] || program.category}</Chip>
+                      )}
+                    </div>
+                    <h3 className="font-heading text-lg font-semibold text-on-surface">
+                      {program.title}
+                    </h3>
+                    <p className="mt-2 line-clamp-3 flex-1 text-sm text-on-surface-variant">
+                      {program.description}
+                    </p>
+                    <div className="mt-4 space-y-1 text-sm text-on-surface-variant">
+                      <p>Durasi: {program.duration}</p>
+                      <p>Kapasitas: {program.capacity} peserta</p>
+                    </div>
+                    <div className="mt-4 flex items-end justify-between">
+                      <div>
+                        <span className="text-xl font-bold text-primary">
+                          {formatRupiah(program.price)}
+                        </span>
+                        <span className="ml-1 text-sm text-on-surface-variant">
+                          {UNIT_LABELS[program.priceUnit] || ''}
+                        </span>
+                      </div>
+                      <Link
+                        to={`/booking?program=${program._id}`}
+                        className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-colors hover:bg-primary-container"
+                      >
+                        Booking
+                      </Link>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
       </section>
+    </div>
+  )
+}
+
+/** Grup tombol filter (pill) */
+function FilterGroup({ label, value, onChange, options, labels }) {
+  const all = ['all', ...options]
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="text-sm font-medium text-on-surface-variant">{label}:</span>
+      {all.map((opt) => (
+        <button
+          key={opt}
+          type="button"
+          onClick={() => onChange(opt)}
+          className={`rounded-full px-3 py-1 text-sm font-medium transition-colors ${
+            value === opt
+              ? 'bg-primary text-on-primary'
+              : 'bg-surface-container text-on-surface-variant hover:bg-surface-high'
+          }`}
+        >
+          {opt === 'all' ? 'Semua' : labels[opt]}
+        </button>
+      ))}
     </div>
   )
 }

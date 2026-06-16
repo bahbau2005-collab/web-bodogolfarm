@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../../utils/api'
+import { Card, Input } from '../../components/ui'
 
 export default function AdminLogin() {
   const navigate = useNavigate()
@@ -17,7 +18,7 @@ export default function AdminLogin() {
     try {
       const res = await apiFetch('/api/auth/login', {
         method: 'POST',
-        body: JSON.stringify(form)
+        body: JSON.stringify(form),
       })
       localStorage.setItem('adminToken', res.token)
       localStorage.setItem('adminUser', JSON.stringify(res.data))
@@ -30,62 +31,54 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-green-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-3xl">🐑</span>
+    <div className="flex min-h-screen items-center justify-center bg-surface-low p-4">
+      <Card className="w-full max-w-md">
+        <div className="mb-8 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-primary text-3xl">
+            🐑
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Bodogol Farm Admin</h1>
-          <p className="text-gray-500 mt-1">Masuk ke panel administrasi</p>
+          <h1 className="font-heading text-2xl font-bold text-on-surface">Bodogol Farm Admin</h1>
+          <p className="mt-1 text-sm text-on-surface-variant">Masuk ke panel administrasi</p>
         </div>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">
+          <p className="mb-4 rounded-lg bg-danger-container px-4 py-3 text-sm text-on-danger-container">
             {error}
-          </div>
+          </p>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-              placeholder="admin@bodogolfarm.com"
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              required
-              placeholder="••••••••"
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-          </div>
-
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input
+            label="Email"
+            type="email"
+            name="email"
+            required
+            value={form.email}
+            onChange={handleChange}
+            placeholder="admin@bodogolfarm.com"
+          />
+          <Input
+            label="Password"
+            type="password"
+            name="password"
+            required
+            value={form.password}
+            onChange={handleChange}
+            placeholder="••••••••"
+          />
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white py-3 rounded-xl font-semibold transition"
+            className="w-full rounded-lg bg-primary py-3 font-medium text-on-primary shadow-soft transition-colors hover:bg-primary-container disabled:opacity-50"
           >
-            {loading ? 'Masuk...' : 'Masuk ke Admin Panel'}
+            {loading ? 'Masuk…' : 'Masuk ke Admin Panel'}
           </button>
         </form>
 
-        <p className="text-center text-xs text-gray-400 mt-6">
+        <p className="mt-6 text-center text-xs text-on-surface-variant">
           Bodogol Farm Management System v1.0
         </p>
-      </div>
+      </Card>
     </div>
   )
 }

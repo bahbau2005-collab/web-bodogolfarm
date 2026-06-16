@@ -1,8 +1,15 @@
 import { useEffect, useState } from 'react'
 import AdminLayout from '../../components/admin/AdminLayout'
+import { Card, Chip, Input } from '../../components/ui'
 import { apiFetch } from '../../utils/api'
+import { formatRupiah } from '../../utils/format'
 
-const emptyForm = { title: '', description: '', duration: '1 hari', price: '', capacity: '', isActive: true }
+const emptyForm = {
+  title: '', description: '', duration: '1 hari',
+  type: 'agrotourism', category: 'umum', mode: 'offline', priceUnit: 'orang',
+  price: '', capacity: '', schedule: 'Sesuai jadwal', isActive: true,
+}
+const TYPE_LABELS = { agrotourism: 'Agrowisata', edukasi: 'Edukasi', training: 'Pelatihan' }
 
 export default function AdminServices() {
   const [programs, setPrograms] = useState([])
@@ -14,38 +21,30 @@ export default function AdminServices() {
 
   const token = localStorage.getItem('adminToken')
 
-  const fetch = () => {
+  const load = () => {
     setLoading(true)
     apiFetch('/api/admin/programs', { headers: { Authorization: `Bearer ${token}` } })
       .then((res) => setPrograms(res.data))
       .catch(console.error)
       .finally(() => setLoading(false))
   }
-
-  useEffect(() => { fetch() }, [])
+  useEffect(() => { load() }, [])
 
   const openAdd = () => { setForm(emptyForm); setModal('add'); setError('') }
-  const openEdit = (p) => { setForm({ ...p, price: p.price, capacity: p.capacity }); setModal('edit'); setError('') }
+  const openEdit = (p) => { setForm({ ...emptyForm, ...p }); setModal('edit'); setError('') }
 
   const handleSave = async () => {
     setSaving(true)
     setError('')
     try {
       const payload = { ...form, price: Number(form.price), capacity: Number(form.capacity) }
+      const opts = { headers: { Authorization: `Bearer ${token}` }, body: JSON.stringify(payload) }
       if (modal === 'add') {
-        await apiFetch('/api/admin/programs', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-          body: JSON.stringify(payload)
-        })
+        await apiFetch('/api/admin/programs', { method: 'POST', ...opts })
       } else {
-        await apiFetch(`/api/admin/programs/${form._id}`, {
-          method: 'PUT',
-          headers: { Authorization: `Bearer ${token}` },
-          body: JSON.stringify(payload)
-        })
+        await apiFetch(`/api/admin/programs/${form._id}`, { method: 'PUT', ...opts })
       }
-      fetch()
+      load()
       setModal(null)
     } catch (err) {
       setError(err.message)
@@ -56,143 +55,100 @@ export default function AdminServices() {
 
   const handleDelete = async (id) => {
     if (!confirm('Hapus program ini?')) return
-    await apiFetch(`/api/admin/programs/${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    fetch()
+    await apiFetch(`/api/admin/programs/${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
+    load()
   }
 
-  const fmtCurrency = (n) => `Rp ${(n || 0).toLocaleString('id-ID')}`
+  const set = (k) => (e) => setForm({ ...form, [k]: e.target.value })
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Layanan">
       <div className="space-y-5">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Layanan & Kuota</h1>
-            <p className="text-gray-500 text-sm mt-1">Kelola program edukasi dan kapasitas</p>
+            <h2 className="font-heading text-2xl font-bold text-on-surface">Kelola Layanan</h2>
+            <p className="mt-1 text-sm text-on-surface-variant">Atur program agrowisata & edukasi.</p>
           </div>
-          <button
-            onClick={openAdd}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-sm font-medium"
-          >
+          <button onClick={openAdd} className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary transition-colors hover:bg-primary-container">
             + Tambah Program
           </button>
         </div>
 
         {loading ? (
-          <div className="text-center py-16 text-gray-400">Memuat...</div>
+          <div className="py-16 text-center text-on-surface-variant">Memuat…</div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
             {programs.map((p) => (
-              <div key={p._id} className="bg-white rounded-2xl p-5 shadow-sm">
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{p.title}</h3>
-                    <p className="text-xs text-gray-500 mt-1 line-clamp-2">{p.description}</p>
-                  </div>
-                  <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-medium ${p.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                    {p.isActive ? 'Aktif' : 'Nonaktif'}
-                  </span>
+              <Card key={p._id}>
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="font-heading font-semibold text-on-surface">{p.title}</h3>
+                  <Chip tone={p.isActive ? 'success' : 'neutral'}>{p.isActive ? 'Aktif' : 'Nonaktif'}</Chip>
                 </div>
-                <div className="space-y-1 text-sm text-gray-600 mb-4">
-                  <div className="flex justify-between"><span>Durasi</span><span className="font-medium">{p.duration}</span></div>
-                  <div className="flex justify-between"><span>Harga</span><span className="font-medium text-green-600">{fmtCurrency(p.price)}</span></div>
-                  <div className="flex justify-between"><span>Kapasitas</span><span className="font-medium">{p.capacity} orang</span></div>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  <Chip tone="info">{TYPE_LABELS[p.type] || p.type}</Chip>
+                  <Chip tone="neutral">{p.mode === 'online' ? 'Online' : 'Offline'}</Chip>
                 </div>
-                <div className="flex gap-2">
-                  <button onClick={() => openEdit(p)} className="flex-1 border border-gray-200 hover:border-green-500 text-gray-700 hover:text-green-600 py-1.5 rounded-lg text-sm">Edit</button>
-                  <button onClick={() => handleDelete(p._id)} className="flex-1 border border-gray-200 hover:border-red-400 text-gray-700 hover:text-red-500 py-1.5 rounded-lg text-sm">Hapus</button>
+                <p className="mt-3 line-clamp-2 text-xs text-on-surface-variant">{p.description}</p>
+                <dl className="mt-4 space-y-1 text-sm">
+                  <div className="flex justify-between"><dt className="text-on-surface-variant">Durasi</dt><dd className="font-medium text-on-surface">{p.duration}</dd></div>
+                  <div className="flex justify-between"><dt className="text-on-surface-variant">Harga</dt><dd className="font-medium text-primary">{formatRupiah(p.price)}/{p.priceUnit || 'orang'}</dd></div>
+                  <div className="flex justify-between"><dt className="text-on-surface-variant">Kapasitas</dt><dd className="font-medium text-on-surface">{p.capacity} orang</dd></div>
+                </dl>
+                <div className="mt-4 flex gap-2">
+                  <button onClick={() => openEdit(p)} className="flex-1 rounded-lg border border-outline-variant py-1.5 text-sm text-on-surface-variant hover:border-primary hover:text-primary">Edit</button>
+                  <button onClick={() => handleDelete(p._id)} className="flex-1 rounded-lg border border-outline-variant py-1.5 text-sm text-on-surface-variant hover:border-danger hover:text-danger">Hapus</button>
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         )}
 
-        {/* Modal */}
         {modal && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-xl">
-              <div className="flex justify-between mb-4">
-                <h2 className="text-lg font-bold">{modal === 'add' ? 'Tambah Program' : 'Edit Program'}</h2>
-                <button onClick={() => setModal(null)} className="text-gray-400 hover:text-gray-600">✕</button>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" onClick={() => setModal(null)}>
+            <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-surface-lowest p-6 shadow-soft-lg" onClick={(e) => e.stopPropagation()}>
+              <div className="mb-4 flex justify-between">
+                <h2 className="font-heading text-lg font-bold text-on-surface">{modal === 'add' ? 'Tambah Program' : 'Edit Program'}</h2>
+                <button onClick={() => setModal(null)} className="text-on-surface-variant hover:text-on-surface">✕</button>
               </div>
-
-              {error && <div className="mb-3 text-sm text-red-600 bg-red-50 p-3 rounded-lg">{error}</div>}
-
+              {error && <p className="mb-3 rounded-lg bg-danger-container p-3 text-sm text-on-danger-container">{error}</p>}
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nama Program</label>
-                  <input
-                    value={form.title}
-                    onChange={(e) => setForm({ ...form, title: e.target.value })}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                  <textarea
-                    value={form.description}
-                    onChange={(e) => setForm({ ...form, description: e.target.value })}
-                    rows={3}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                  />
+                <Input label="Nama Program" value={form.title} onChange={set('title')} />
+                <Input as="textarea" label="Deskripsi" value={form.description} onChange={set('description')} />
+                <div className="grid grid-cols-2 gap-3">
+                  <Select label="Jenis" value={form.type} onChange={set('type')} options={[['agrotourism', 'Agrowisata'], ['edukasi', 'Edukasi'], ['training', 'Pelatihan']]} />
+                  <Select label="Kategori" value={form.category} onChange={set('category')} options={[['umum', 'Umum'], ['family', 'Keluarga'], ['school', 'Sekolah'], ['university', 'Kampus']]} />
+                  <Select label="Mode" value={form.mode} onChange={set('mode')} options={[['offline', 'Offline'], ['online', 'Online']]} />
+                  <Select label="Satuan Harga" value={form.priceUnit} onChange={set('priceUnit')} options={[['orang', 'Per orang'], ['paket', 'Per paket'], ['course', 'Per course'], ['semester', 'Per semester']]} />
                 </div>
                 <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Durasi</label>
-                    <select
-                      value={form.duration}
-                      onChange={(e) => setForm({ ...form, duration: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                    >
-                      <option>1 hari</option>
-                      <option>2 hari</option>
-                      <option>3 hari</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Harga (Rp)</label>
-                    <input
-                      type="number"
-                      value={form.price}
-                      onChange={(e) => setForm({ ...form, price: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Kapasitas</label>
-                    <input
-                      type="number"
-                      value={form.capacity}
-                      onChange={(e) => setForm({ ...form, capacity: e.target.value })}
-                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-                    />
-                  </div>
+                  <Input label="Durasi" value={form.duration} onChange={set('duration')} />
+                  <Input label="Harga (Rp)" type="number" value={form.price} onChange={set('price')} />
+                  <Input label="Kapasitas" type="number" value={form.capacity} onChange={set('capacity')} />
                 </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="isActive"
-                    checked={form.isActive}
-                    onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
-                    className="w-4 h-4 accent-green-600"
-                  />
-                  <label htmlFor="isActive" className="text-sm text-gray-700">Program Aktif</label>
-                </div>
+                <label className="flex items-center gap-2 text-sm text-on-surface">
+                  <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} className="h-4 w-4 accent-[var(--color-primary)]" />
+                  Program Aktif
+                </label>
               </div>
-
-              <div className="flex gap-3 mt-5">
-                <button onClick={() => setModal(null)} className="flex-1 border border-gray-300 text-gray-700 py-2 rounded-xl text-sm">Batal</button>
-                <button onClick={handleSave} disabled={saving} className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-xl text-sm font-medium">
-                  {saving ? 'Menyimpan...' : 'Simpan'}
-                </button>
+              <div className="mt-5 flex gap-3">
+                <button onClick={() => setModal(null)} className="flex-1 rounded-lg border border-outline-variant py-2 text-sm text-on-surface-variant">Batal</button>
+                <button onClick={handleSave} disabled={saving} className="flex-1 rounded-lg bg-primary py-2 text-sm font-medium text-on-primary disabled:opacity-50">{saving ? 'Menyimpan…' : 'Simpan'}</button>
               </div>
             </div>
           </div>
         )}
       </div>
     </AdminLayout>
+  )
+}
+
+function Select({ label, value, onChange, options }) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-sm font-medium text-on-surface-variant">{label}</label>
+      <select value={value} onChange={onChange} className="w-full rounded-lg border border-outline-variant bg-surface-lowest px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30">
+        {options.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+      </select>
+    </div>
   )
 }

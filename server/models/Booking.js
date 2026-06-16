@@ -10,6 +10,19 @@ const bookingSchema = new mongoose.Schema({
     ref: 'Program',
     required: [true, 'Program reference is required']
   },
+  // Sesi/jadwal yang dipesan (opsional; berisi kuota)
+  schedule: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Schedule'
+  },
+  // Kode tiket unik untuk e-ticket (mis. BF-2026-X7K9A), digenerate otomatis
+  ticketCode: {
+    type: String,
+    unique: true,
+    sparse: true,
+    uppercase: true,
+    trim: true
+  },
   customerName: {
     type: String,
     required: [true, 'Customer name is required'],
@@ -34,6 +47,17 @@ const bookingSchema = new mongoose.Schema({
     required: [true, 'Number of participants is required'],
     min: [1, 'At least 1 participant required'],
     max: [50, 'Maximum 50 participants allowed']
+  },
+  // Rincian peserta (dewasa/anak). participants = adults + children
+  adults: {
+    type: Number,
+    default: 1,
+    min: [0, 'Adults cannot be negative']
+  },
+  children: {
+    type: Number,
+    default: 0,
+    min: [0, 'Children cannot be negative']
   },
   bookingDate: {
     type: Date,
@@ -117,6 +141,21 @@ bookingSchema.virtual('formattedBookingDate').get(function() {
 // Ensure virtual fields are serialized
 bookingSchema.set('toJSON', { virtuals: true });
 bookingSchema.set('toObject', { virtuals: true });
+
+// Generate ticketCode otomatis saat dokumen baru dibuat.
+// Format: BF-<tahun>-<5 char acak>, mis. "BF-2026-X7K9A"
+bookingSchema.pre('save', function (next) {
+  if (!this.ticketCode) {
+    const year = new Date().getFullYear();
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // hindari karakter ambigu (0/O, 1/I)
+    let code = '';
+    for (let i = 0; i < 5; i++) {
+      code += chars[Math.floor(Math.random() * chars.length)];
+    }
+    this.ticketCode = `BF-${year}-${code}`;
+  }
+  next();
+});
 
 const Booking = mongoose.model('Booking', bookingSchema);
 

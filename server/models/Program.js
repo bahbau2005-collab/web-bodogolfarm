@@ -16,15 +16,40 @@ const programSchema = new mongoose.Schema({
     required: [true, 'Program description is required'],
     maxlength: [1000, 'Description cannot exceed 1000 characters']
   },
+  // Jenis layanan (untuk filter & label di halaman Services)
+  type: {
+    type: String,
+    enum: ['agrotourism', 'edukasi', 'training'],
+    default: 'agrotourism'
+  },
+  // Target peserta
+  category: {
+    type: String,
+    enum: ['family', 'school', 'university', 'umum'],
+    default: 'umum'
+  },
+  // Mode pelaksanaan
+  mode: {
+    type: String,
+    enum: ['offline', 'online'],
+    default: 'offline'
+  },
   duration: {
     type: String,
     required: [true, 'Program duration is required'],
-    enum: ['1 hari', '2 hari', '3 hari']
+    trim: true,
+    maxlength: [50, 'Duration cannot exceed 50 characters']
   },
   price: {
     type: Number,
     required: [true, 'Program price is required'],
     min: [0, 'Price cannot be negative']
+  },
+  // Satuan harga: per orang / paket / course / semester
+  priceUnit: {
+    type: String,
+    enum: ['orang', 'paket', 'course', 'semester'],
+    default: 'orang'
   },
   capacity: {
     type: Number,

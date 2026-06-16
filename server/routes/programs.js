@@ -50,7 +50,11 @@ router.get('/:id', asyncHandler(async (req, res) => {
 router.post('/', [
   body('title').trim().isLength({ min: 1, max: 100 }).withMessage('Title is required and max 100 chars'),
   body('description').trim().isLength({ min: 1, max: 1000 }).withMessage('Description is required and max 1000 chars'),
-  body('duration').isIn(['1 hari', '2 hari', '3 hari']).withMessage('Invalid duration'),
+  body('duration').trim().isLength({ min: 1, max: 50 }).withMessage('Duration is required'),
+  body('type').optional().isIn(['agrotourism', 'edukasi', 'training']).withMessage('Invalid type'),
+  body('category').optional().isIn(['family', 'school', 'university', 'umum']).withMessage('Invalid category'),
+  body('mode').optional().isIn(['offline', 'online']).withMessage('Invalid mode'),
+  body('priceUnit').optional().isIn(['orang', 'paket', 'course', 'semester']).withMessage('Invalid price unit'),
   body('price').isNumeric().withMessage('Price must be a number'),
   body('capacity').isNumeric().withMessage('Capacity must be a number'),
   body('schedule').trim().isLength({ min: 1 }).withMessage('Schedule is required')
