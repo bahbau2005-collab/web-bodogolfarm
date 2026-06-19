@@ -1,17 +1,23 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Card, Chip } from '../components/ui'
+import imgDomba from '../assets/domba-modern.png'
+import imgPakan from '../assets/pakan.png'
+import imgKesehatan from '../assets/kesehatan.png'
+import imgBisnis from '../assets/bisnis.png'
+import imgTeknologi from '../assets/teknologi.png'
+import imgKeberlanjutan from '../assets/keberlanjutan.png'
 
 /**
  * Edukasi — Hub artikel edukasi peternakan. Filter kategori + modal baca.
  */
 const EDUKASI_ARTICLES = [
-  { id: 1, title: 'Panduan Lengkap Beternak Domba Modern', excerpt: 'Langkah praktis memulai peternakan domba dari nol hingga menghasilkan.', content: 'Peternakan domba modern membutuhkan perencanaan yang matang...', category: 'Panduan', readTime: '5 menit' },
-  { id: 2, title: 'Pakan Ternak yang Efektif untuk Pertumbuhan Optimal', excerpt: 'Strategi pemberian pakan yang tepat untuk meningkatkan produktivitas ternak.', content: 'Pakan merupakan 70% dari keberhasilan peternakan...', category: 'Nutrisi', readTime: '4 menit' },
-  { id: 3, title: 'Manajemen Kesehatan Domba di Peternakan', excerpt: 'Cara mencegah dan menangani penyakit umum pada ternak domba.', content: 'Kesehatan ternak adalah prioritas utama dalam peternakan modern...', category: 'Kesehatan', readTime: '6 menit' },
-  { id: 4, title: 'Bisnis Peternakan Domba: Dari Hobi ke Profit', excerpt: 'Analisis profitabilitas dan strategi bisnis peternakan domba yang sukses.', content: 'Peternakan domba bukan hanya hobi, tapi juga peluang bisnis...', category: 'Bisnis', readTime: '7 menit' },
-  { id: 5, title: 'Teknologi Modern dalam Peternakan Domba', excerpt: 'Penerapan teknologi untuk efisiensi peternakan modern.', content: 'Teknologi telah merevolusi cara kita mengelola peternakan...', category: 'Teknologi', readTime: '5 menit' },
-  { id: 6, title: 'Keberlanjutan dalam Peternakan Domba', excerpt: 'Praktik peternakan berkelanjutan untuk masa depan yang lebih baik.', content: 'Peternakan berkelanjutan adalah kunci keberlanjutan lingkungan...', category: 'Keberlanjutan', readTime: '4 menit' },
+  { id: 1, title: 'Panduan Lengkap Beternak Domba Modern', excerpt: 'Langkah praktis memulai peternakan domba dari nol hingga menghasilkan.', content: 'Peternakan domba modern membutuhkan perencanaan yang matang...', category: 'Panduan', readTime: '5 menit', image: imgDomba },
+  { id: 2, title: 'Pakan Ternak yang Efektif untuk Pertumbuhan Optimal', excerpt: 'Strategi pemberian pakan yang tepat untuk meningkatkan produktivitas ternak.', content: 'Pakan merupakan 70% dari keberhasilan peternakan...', category: 'Nutrisi', readTime: '4 menit', image: imgPakan },
+  { id: 3, title: 'Manajemen Kesehatan Domba di Peternakan', excerpt: 'Cara mencegah dan menangani penyakit umum pada ternak domba.', content: 'Kesehatan ternak adalah prioritas utama dalam peternakan modern...', category: 'Kesehatan', readTime: '6 menit', image: imgKesehatan },
+  { id: 4, title: 'Bisnis Peternakan Domba: Dari Hobi ke Profit', excerpt: 'Analisis profitabilitas dan strategi bisnis peternakan domba yang sukses.', content: 'Peternakan domba bukan hanya hobi, tapi juga peluang bisnis...', category: 'Bisnis', readTime: '7 menit', image: imgBisnis },
+  { id: 5, title: 'Teknologi Modern dalam Peternakan Domba', excerpt: 'Penerapan teknologi untuk efisiensi peternakan modern.', content: 'Teknologi telah merevolusi cara kita mengelola peternakan...', category: 'Teknologi', readTime: '5 menit', image: imgTeknologi },
+  { id: 6, title: 'Keberlanjutan dalam Peternakan Domba', excerpt: 'Praktik peternakan berkelanjutan untuk masa depan yang lebih baik.', content: 'Peternakan berkelanjutan adalah kunci keberlanjutan lingkungan...', category: 'Keberlanjutan', readTime: '4 menit', image: imgKeberlanjutan },
 ]
 const CATEGORIES = ['Semua', 'Panduan', 'Nutrisi', 'Kesehatan', 'Bisnis', 'Teknologi', 'Keberlanjutan']
 
@@ -65,7 +71,7 @@ export default function Edukasi() {
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {articles.map((a) => (
               <Card key={a.id} padded={false} hover className="overflow-hidden" onClick={() => setSelectedArticle(a)}>
-                <div className="flex aspect-[16/9] items-center justify-center bg-surface-high text-4xl">📚</div>
+                <img src={a.image} alt={a.title} className="aspect-[16/9] w-full object-cover" />
                 <div className="p-6">
                   <div className="mb-3 flex items-center justify-between">
                     <Chip tone="info">{a.category}</Chip>
@@ -109,9 +115,7 @@ export default function Edukasi() {
               </button>
             </div>
 
-            <div className="mt-6 flex aspect-[16/9] items-center justify-center rounded-lg bg-surface-high text-5xl">
-              📖
-            </div>
+            <img src={selectedArticle.image} alt={selectedArticle.title} className="mt-6 aspect-[16/9] w-full rounded-lg object-cover" />
 
             <div className="mt-6 space-y-4 text-on-surface-variant">
               <p>{selectedArticle.content}</p>

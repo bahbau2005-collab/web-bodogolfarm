@@ -1,5 +1,7 @@
 import { SITE_CONFIG, PILLARS } from '../utils/constants'
 import { Card } from '../components/ui'
+import aboutFacility from '../assets/about-facility.png'
+import founder from '../assets/founder.png'
 
 /**
  * About — profil perusahaan, visi & misi, 6 pilar, tim, lokasi.
@@ -40,9 +42,7 @@ export default function About() {
               menjadi pusat edukasi dan inovasi peternakan berkelanjutan.
             </p>
           </div>
-          <div className="flex aspect-[4/3] items-center justify-center rounded-xl bg-surface-high text-6xl shadow-soft">
-            🏢
-          </div>
+          <img src={aboutFacility} alt="Fasilitas Bodogol Farm" className="aspect-[4/3] w-full rounded-xl object-cover shadow-soft" />
         </div>
       </section>
 
@@ -99,9 +99,7 @@ export default function About() {
             Tim & Pengelola
           </h2>
           <Card className="mt-12">
-            <div className="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-surface-high text-5xl">
-              👨‍🌾
-            </div>
+            <img src={founder} alt={SITE_CONFIG.company.founder} className="mx-auto h-28 w-28 rounded-full object-cover" />
             <h3 className="mt-6 font-heading text-xl font-bold text-on-surface">
               {SITE_CONFIG.company.founder}
             </h3>
@@ -136,9 +134,15 @@ export default function About() {
               ))}
             </ul>
           </div>
-          <div className="flex aspect-[4/3] items-center justify-center rounded-xl bg-surface-high text-on-surface-variant shadow-soft">
-            🗺️ Peta Lokasi Bodogol Farm
-          </div>
+          <iframe
+            title="Lokasi Bodogol Farm"
+            src={`https://maps.google.com/maps?q=${SITE_CONFIG.location.coords.lat},${SITE_CONFIG.location.coords.lng}&z=15&output=embed`}
+            className="aspect-[4/3] w-full rounded-xl shadow-soft"
+            style={{ border: 0 }}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            allowFullScreen
+          />
         </div>
       </section>
     </div>

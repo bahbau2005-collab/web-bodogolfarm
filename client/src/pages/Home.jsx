@@ -3,6 +3,16 @@ import { PILLARS, PROGRAMS, TESTIMONIALS } from '../utils/constants'
 import HeroSection from '../components/HeroSection'
 import { Card } from '../components/ui'
 import { formatRupiah } from '../utils/format'
+import { programImage } from '../utils/programImages'
+import peternakPria from '../assets/peternak-pemula-pria.png'
+import guruWanita from '../assets/guru-wanita.png'
+import pengusahaPria from '../assets/pengusaha-pria.png'
+
+const TESTIMONIAL_AVATARS = {
+  testi_001: peternakPria,
+  testi_002: guruWanita,
+  testi_003: pengusahaPria,
+}
 
 /**
  * Home — halaman utama. Section: Hero, Tentang singkat, 6 Pilar,
@@ -68,7 +78,11 @@ export default function Home() {
           <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {PROGRAMS.map((program) => (
               <Card key={program.id} padded={false} hover className="overflow-hidden">
-                <div className="aspect-[4/3] w-full bg-surface-high" />
+                <img
+                  src={programImage(program.name)}
+                  alt={program.name}
+                  className="aspect-[4/3] w-full object-cover"
+                />
                 <div className="p-5">
                   <h3 className="font-heading text-base font-semibold text-on-surface">
                     {program.name}
@@ -115,9 +129,18 @@ export default function Home() {
                 <div className="mt-4 text-sm text-amber-500">
                   {'★'.repeat(t.rating)}
                 </div>
-                <div className="mt-3">
-                  <p className="font-semibold text-on-surface">{t.name}</p>
-                  <p className="text-sm text-on-surface-variant">{t.role}</p>
+                <div className="mt-3 flex items-center gap-3">
+                  {TESTIMONIAL_AVATARS[t.id] && (
+                    <img
+                      src={TESTIMONIAL_AVATARS[t.id]}
+                      alt={t.name}
+                      className="h-11 w-11 rounded-full object-cover"
+                    />
+                  )}
+                  <div>
+                    <p className="font-semibold text-on-surface">{t.name}</p>
+                    <p className="text-sm text-on-surface-variant">{t.role}</p>
+                  </div>
                 </div>
               </Card>
             ))}

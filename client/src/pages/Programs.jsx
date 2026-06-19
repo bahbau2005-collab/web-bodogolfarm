@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { apiFetch } from '../utils/api'
 import { Card, Chip } from '../components/ui'
 import { formatRupiah } from '../utils/format'
+import { programImage } from '../utils/programImages'
 
 // Label tampilan (enum DB -> Indonesia)
 const TYPE_LABELS = {
@@ -114,9 +115,11 @@ export default function Programs() {
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filtered.map((program) => (
                 <Card key={program._id} padded={false} hover className="flex flex-col overflow-hidden">
-                  <div className="flex aspect-[4/3] items-center justify-center bg-surface-high text-4xl">
-                    🐑
-                  </div>
+                  <img
+                    src={programImage(program.title)}
+                    alt={program.title}
+                    className="aspect-[4/3] w-full object-cover"
+                  />
                   <div className="flex flex-1 flex-col p-6">
                     <div className="mb-3 flex flex-wrap gap-2">
                       {program.type && (

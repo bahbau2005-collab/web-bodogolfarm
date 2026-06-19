@@ -1,14 +1,26 @@
 import { Link } from 'react-router-dom'
+import heroBg from '../assets/hero-bg.png'
 
 /**
  * HeroSection — bagian paling atas Beranda.
- * Layout: teks + CTA di kiri, foto farm di kanan (sesuai design reference).
+ * Background foto farm yang di-blur + lapisan cream transparan agar teks
+ * tetap terbaca (sesuai design reference). Di atasnya: teks + CTA di kiri,
+ * foto utama di kanan.
  */
 export default function HeroSection() {
   return (
-    <section className="bg-surface">
-      <div className="mx-auto grid max-w-[1280px] items-center gap-10 px-6 py-16 md:grid-cols-2 md:py-24">
-        {/* Teks */}
+    <section className="relative overflow-hidden">
+      {/* Background foto (blur) */}
+      <div
+        className="absolute inset-0 scale-105 bg-cover bg-center blur-[3px]"
+        style={{ backgroundImage: `url(${heroBg})` }}
+        aria-hidden="true"
+      />
+      {/* Lapisan cream transparan untuk keterbacaan */}
+      <div className="absolute inset-0 bg-surface/55" aria-hidden="true" />
+
+      {/* Konten */}
+      <div className="relative mx-auto grid max-w-[1280px] items-center gap-10 px-6 py-16 md:grid-cols-2 md:py-24">
         <div>
           <h1 className="font-heading text-4xl font-bold leading-tight text-on-surface md:text-5xl">
             Belajar, Mengalami, dan Tumbuh bersama{' '}
@@ -31,17 +43,17 @@ export default function HeroSection() {
             </Link>
             <Link
               to="/booking"
-              className="inline-flex items-center rounded-lg border border-secondary px-6 py-3 font-medium text-secondary transition-colors hover:bg-secondary-container/40"
+              className="inline-flex items-center rounded-lg border border-secondary bg-surface/60 px-6 py-3 font-medium text-secondary transition-colors hover:bg-secondary-container/40"
             >
               Booking Sekarang
             </Link>
           </div>
         </div>
 
-        {/* Gambar */}
+        {/* Foto utama */}
         <div className="overflow-hidden rounded-xl shadow-soft-lg">
           <img
-            src="https://images.unsplash.com/photo-1500595046891-d9aee9a95fe5?w=1000&h=750&fit=crop"
+            src={heroBg}
             alt="Suasana peternakan Bodogol Farm"
             className="h-full w-full object-cover"
           />
