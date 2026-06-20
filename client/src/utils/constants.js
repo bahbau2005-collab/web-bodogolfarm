@@ -192,7 +192,7 @@ export const SITE_CONFIG = {
     address: "Kp. Kuta RT 03/RW 09, Desa Purwasari, Kec. Cicurug, Kab. Sukabumi, Jawa Barat",
     phone: "0857-5961-6910",
     email: "contact@bodogolfarm.com",
-    coords: { lat: -6.9497, lng: 106.9318 }, // Approximate
+    coords: { lat: -6.7878095, lng: 106.7880468 }, // Bodogol Farm (dari Google Maps)
   },
   
   // Visi & Misi

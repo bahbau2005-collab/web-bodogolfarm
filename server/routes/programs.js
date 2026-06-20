@@ -2,6 +2,7 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import Program from '../models/Program.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
+import { protect, adminOnly } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -47,7 +48,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
  * @desc    Create new program (Admin only - will add auth later)
  * @access  Private/Admin
  */
-router.post('/', [
+router.post('/', protect, adminOnly, [
   body('title').trim().isLength({ min: 1, max: 100 }).withMessage('Title is required and max 100 chars'),
   body('description').trim().isLength({ min: 1, max: 1000 }).withMessage('Description is required and max 1000 chars'),
   body('duration').trim().isLength({ min: 1, max: 50 }).withMessage('Duration is required'),
@@ -82,7 +83,7 @@ router.post('/', [
  * @desc    Update program (Admin only - will add auth later)
  * @access  Private/Admin
  */
-router.put('/:id', asyncHandler(async (req, res) => {
+router.put('/:id', protect, adminOnly, asyncHandler(async (req, res) => {
   const program = await Program.findByIdAndUpdate(
     req.params.id,
     req.body,
@@ -107,7 +108,7 @@ router.put('/:id', asyncHandler(async (req, res) => {
  * @desc    Delete program (Admin only - will add auth later)
  * @access  Private/Admin
  */
-router.delete('/:id', asyncHandler(async (req, res) => {
+router.delete('/:id', protect, adminOnly, asyncHandler(async (req, res) => {
   const program = await Program.findById(req.params.id);
 
   if (!program) {

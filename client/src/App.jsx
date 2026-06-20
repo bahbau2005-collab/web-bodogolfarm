@@ -9,6 +9,7 @@ import Booking from './pages/Booking'
 import Contact from './pages/Contact'
 import Edukasi from './pages/Edukasi'
 import PaymentStatus from './pages/PaymentStatus'
+import NotFound from './pages/NotFound'
 
 // Admin pages
 import AdminLogin from './pages/admin/AdminLogin'
@@ -58,6 +59,9 @@ function App() {
         <Route path="/edukasi" element={<CustomerLayout><Edukasi /></CustomerLayout>} />
         <Route path="/payment" element={<CustomerLayout><PaymentStatus /></CustomerLayout>} />
         <Route path="/contact" element={<CustomerLayout><Contact /></CustomerLayout>} />
+
+        {/* 404 — catch-all */}
+        <Route path="*" element={<CustomerLayout><NotFound /></CustomerLayout>} />
       </Routes>
     </Router>
   )

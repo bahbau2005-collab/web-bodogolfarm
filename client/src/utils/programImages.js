@@ -1,7 +1,7 @@
-import paud from '../assets/paud.png'
-import sekolah from '../assets/sekolah.png'
-import outing from '../assets/outing.png'
-import magang from '../assets/magang.png'
+import paud from '../assets/paud.webp'
+import sekolah from '../assets/sekolah.webp'
+import outing from '../assets/outing.webp'
+import magang from '../assets/magang.webp'
 
 /**
  * Petakan judul/nama program ke foto yang sesuai (cocokkan kata kunci).

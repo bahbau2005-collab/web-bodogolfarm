@@ -2,6 +2,7 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import Schedule from '../models/Schedule.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
+import { protect, adminOnly } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -43,7 +44,7 @@ router.get('/:id', asyncHandler(async (req, res) => {
  * @desc    Buat jadwal baru (Admin)
  * @access  Private/Admin
  */
-router.post('/', [
+router.post('/', protect, adminOnly, [
   body('program').isMongoId().withMessage('Valid program ID is required'),
   body('date').isISO8601().withMessage('Valid date is required'),
   body('startTime').matches(/^([01]\d|2[0-3]):[0-5]\d$/).withMessage('Format jam HH:mm'),
@@ -64,7 +65,7 @@ router.post('/', [
  * @desc    Update jadwal (Admin)
  * @access  Private/Admin
  */
-router.put('/:id', asyncHandler(async (req, res) => {
+router.put('/:id', protect, adminOnly, asyncHandler(async (req, res) => {
   const schedule = await Schedule.findByIdAndUpdate(
     req.params.id,
     req.body,
@@ -81,7 +82,7 @@ router.put('/:id', asyncHandler(async (req, res) => {
  * @desc    Hapus jadwal (Admin)
  * @access  Private/Admin
  */
-router.delete('/:id', asyncHandler(async (req, res) => {
+router.delete('/:id', protect, adminOnly, asyncHandler(async (req, res) => {
   const schedule = await Schedule.findById(req.params.id);
   if (!schedule) {
     return res.status(404).json({ success: false, error: 'Schedule not found' });

@@ -4,6 +4,7 @@ import Booking from '../models/Booking.js';
 import Program from '../models/Program.js';
 import Schedule from '../models/Schedule.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
+import { protect, adminOnly } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -12,7 +13,7 @@ const router = express.Router();
  * @desc    Get all bookings (Admin only - will add auth later)
  * @access  Private/Admin
  */
-router.get('/', asyncHandler(async (req, res) => {
+router.get('/', protect, adminOnly, asyncHandler(async (req, res) => {
   const bookings = await Booking.find()
     .populate('program', 'title duration price')
     .sort({ createdAt: -1 });
@@ -29,7 +30,7 @@ router.get('/', asyncHandler(async (req, res) => {
  * @desc    Get single booking by ID
  * @access  Private/Admin
  */
-router.get('/:id', asyncHandler(async (req, res) => {
+router.get('/:id', protect, adminOnly, asyncHandler(async (req, res) => {
   const booking = await Booking.findById(req.params.id)
     .populate('program', 'title duration price facilities');
 
@@ -161,7 +162,7 @@ router.post('/', [
  * @desc    Update booking status (Admin only - will add auth later)
  * @access  Private/Admin
  */
-router.put('/:id', asyncHandler(async (req, res) => {
+router.put('/:id', protect, adminOnly, asyncHandler(async (req, res) => {
   const booking = await Booking.findByIdAndUpdate(
     req.params.id,
     req.body,
@@ -186,7 +187,7 @@ router.put('/:id', asyncHandler(async (req, res) => {
  * @desc    Cancel booking
  * @access  Private/Admin or Owner
  */
-router.delete('/:id', asyncHandler(async (req, res) => {
+router.delete('/:id', protect, adminOnly, asyncHandler(async (req, res) => {
   const booking = await Booking.findById(req.params.id);
 
   if (!booking) {
@@ -196,9 +197,20 @@ router.delete('/:id', asyncHandler(async (req, res) => {
     });
   }
 
+  const wasCancelled = booking.status === 'cancelled';
+
   // Update status to cancelled instead of deleting
   booking.status = 'cancelled';
   await booking.save();
+
+  // Kembalikan kuota sesi kalau sebelumnya belum dibatalkan
+  if (!wasCancelled && booking.schedule) {
+    const schedule = await Schedule.findById(booking.schedule);
+    if (schedule) {
+      schedule.booked = Math.max(schedule.booked - booking.participants, 0);
+      await schedule.save();
+    }
+  }
 
   res.json({
     success: true,

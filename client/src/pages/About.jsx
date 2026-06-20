@@ -1,7 +1,7 @@
 import { SITE_CONFIG, PILLARS } from '../utils/constants'
 import { Card } from '../components/ui'
-import aboutFacility from '../assets/about-facility.png'
-import founder from '../assets/founder.png'
+import aboutFacility from '../assets/about-facility.webp'
+import founder from '../assets/founder.webp'
 
 /**
  * About — profil perusahaan, visi & misi, 6 pilar, tim, lokasi.

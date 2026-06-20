@@ -4,9 +4,9 @@ import HeroSection from '../components/HeroSection'
 import { Card } from '../components/ui'
 import { formatRupiah } from '../utils/format'
 import { programImage } from '../utils/programImages'
-import peternakPria from '../assets/peternak-pemula-pria.png'
-import guruWanita from '../assets/guru-wanita.png'
-import pengusahaPria from '../assets/pengusaha-pria.png'
+import peternakPria from '../assets/peternak-pemula-pria.webp'
+import guruWanita from '../assets/guru-wanita.webp'
+import pengusahaPria from '../assets/pengusaha-pria.webp'
 
 const TESTIMONIAL_AVATARS = {
   testi_001: peternakPria,

@@ -49,8 +49,9 @@ router.post('/create', async (req, res) => {
     try {
       transaction = await snap.createTransaction(parameter)
     } catch (midtransError) {
-      console.log('Midtrans not configured, using mock payment for demo')
-      // Mock payment response for demo purposes
+      // Midtrans gagal (key salah / tidak ada internet) -> fallback mock untuk demo.
+      // Error asli di-log agar mudah debug kalau sandbox seharusnya jalan.
+      console.warn('[Midtrans] createTransaction gagal, pakai mock. Penyebab:', midtransError.message)
       transaction = {
         token: `mock-token-${Date.now()}`,
         redirect_url: `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment?status=success&order_id=${orderId}`

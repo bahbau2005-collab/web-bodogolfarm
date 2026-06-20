@@ -7,6 +7,7 @@ import { errorHandler, notFound } from './middleware/errorHandler.js';
 // Route imports
 import programRoutes from './routes/programs.js';
 import scheduleRoutes from './routes/schedules.js';
+import articleRoutes from './routes/articles.js';
 import bookingRoutes from './routes/bookings.js';
 import contactRoutes from './routes/contact.js';
 import paymentRoutes from './routes/payments.js';
@@ -45,6 +46,7 @@ app.get('/api/health', (req, res) => {
 // API routes
 app.use('/api/programs', apiLimiter, programRoutes);
 app.use('/api/schedules', apiLimiter, scheduleRoutes);
+app.use('/api/articles', apiLimiter, articleRoutes);
 app.use('/api/bookings', apiLimiter, bookingRoutes);
 app.use('/api/contact', apiLimiter, contactRoutes);
 app.use('/api/payments', apiLimiter, paymentRoutes);

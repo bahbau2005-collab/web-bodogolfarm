@@ -1,6 +1,7 @@
 import express from 'express';
 import Booking from '../models/Booking.js';
 import Program from '../models/Program.js';
+import Schedule from '../models/Schedule.js';
 import { protect, adminOnly } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -118,14 +119,26 @@ router.get('/bookings', async (req, res) => {
 router.patch('/bookings/:id/status', async (req, res) => {
   try {
     const { status, notes } = req.body;
-    const booking = await Booking.findByIdAndUpdate(
-      req.params.id,
-      { status, notes },
-      { new: true }
-    ).populate('program', 'title');
 
+    const booking = await Booking.findById(req.params.id);
     if (!booking) return res.status(404).json({ success: false, error: 'Booking not found' });
 
+    const wasCancelled = booking.status === 'cancelled';
+
+    booking.status = status;
+    if (notes !== undefined) booking.notes = notes;
+    await booking.save();
+
+    // Kembalikan kuota sesi kalau booking baru saja dibatalkan
+    if (status === 'cancelled' && !wasCancelled && booking.schedule) {
+      const schedule = await Schedule.findById(booking.schedule);
+      if (schedule) {
+        schedule.booked = Math.max(schedule.booked - booking.participants, 0);
+        await schedule.save();
+      }
+    }
+
+    await booking.populate('program', 'title');
     res.json({ success: true, data: booking });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

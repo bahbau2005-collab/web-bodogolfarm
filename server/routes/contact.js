@@ -2,6 +2,7 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import Contact from '../models/Contact.js';
 import { asyncHandler } from '../middleware/errorHandler.js';
+import { protect, adminOnly } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -10,7 +11,7 @@ const router = express.Router();
  * @desc    Get all contact messages (Admin only - will add auth later)
  * @access  Private/Admin
  */
-router.get('/', asyncHandler(async (req, res) => {
+router.get('/', protect, adminOnly, asyncHandler(async (req, res) => {
   const { page = 1, limit = 10, isRead, subject } = req.query;
 
   // Build filter object
@@ -52,7 +53,7 @@ router.get('/', asyncHandler(async (req, res) => {
  * @desc    Get single contact message
  * @access  Private/Admin
  */
-router.get('/:id', asyncHandler(async (req, res) => {
+router.get('/:id', protect, adminOnly, asyncHandler(async (req, res) => {
   const contact = await Contact.findById(req.params.id);
 
   if (!contact) {
@@ -104,7 +105,7 @@ router.post('/', [
  * @desc    Mark message as read
  * @access  Private/Admin
  */
-router.put('/:id/read', asyncHandler(async (req, res) => {
+router.put('/:id/read', protect, adminOnly, asyncHandler(async (req, res) => {
   const contact = await Contact.findByIdAndUpdate(
     req.params.id,
     { isRead: true },
@@ -130,7 +131,7 @@ router.put('/:id/read', asyncHandler(async (req, res) => {
  * @desc    Reply to contact message
  * @access  Private/Admin
  */
-router.put('/:id/reply', [
+router.put('/:id/reply', protect, adminOnly, [
   body('replyMessage').trim().isLength({ min: 1, max: 2000 }).withMessage('Reply message is required'),
   body('repliedBy').trim().isLength({ min: 1 }).withMessage('Replier name is required')
 ], asyncHandler(async (req, res) => {
@@ -173,7 +174,7 @@ router.put('/:id/reply', [
  * @desc    Delete contact message
  * @access  Private/Admin
  */
-router.delete('/:id', asyncHandler(async (req, res) => {
+router.delete('/:id', protect, adminOnly, asyncHandler(async (req, res) => {
   const contact = await Contact.findById(req.params.id);
 
   if (!contact) {

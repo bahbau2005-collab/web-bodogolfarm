@@ -40,15 +40,20 @@ export const securityConfig = helmet({
  * Rate Limiting Configuration
  * Prevents abuse by limiting requests per IP
  */
+// Saat development limiter dimatikan agar tidak mengganggu (React StrictMode
+// fetch 2x, HMR, dsb). Di production tetap aktif untuk keamanan.
+const skipInDev = () => process.env.NODE_ENV !== 'production';
+
 export const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // limit each IP to 100 requests per windowMs
+  max: 1000, // limit each IP to 1000 requests per windowMs
   message: {
     error: 'Too many requests from this IP, please try again later.',
     retryAfter: '15 minutes'
   },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  skip: skipInDev
 });
 
 /**
@@ -56,13 +61,14 @@ export const limiter = rateLimit({
  */
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 50, // limit each IP to 50 API requests per windowMs
+  max: 500, // limit each IP to 500 API requests per windowMs
   message: {
     error: 'Too many API requests, please try again later.',
     retryAfter: '15 minutes'
   },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  skip: skipInDev
 });
 
 /**
@@ -70,11 +76,12 @@ export const apiLimiter = rateLimit({
  */
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // limit each IP to 10 auth attempts per windowMs
+  max: 20, // limit each IP to 20 auth attempts per windowMs
   message: {
     error: 'Too many authentication attempts, please try again later.',
     retryAfter: '15 minutes'
   },
   standardHeaders: true,
-  legacyHeaders: false
+  legacyHeaders: false,
+  skip: skipInDev
 });
