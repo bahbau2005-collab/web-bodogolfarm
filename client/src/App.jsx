@@ -19,6 +19,7 @@ import AdminServices from './pages/admin/AdminServices'
 import AdminSchedules from './pages/admin/AdminSchedules'
 import AdminContent from './pages/admin/AdminContent'
 import AdminMessages from './pages/admin/AdminMessages'
+import AdminUsers from './pages/admin/AdminUsers'
 import AdminReports from './pages/admin/AdminReports'
 import AdminSettings from './pages/admin/AdminSettings'
 
@@ -50,6 +51,7 @@ function App() {
         <Route path="/admin/content" element={<AdminRoute><AdminContent /></AdminRoute>} />
         <Route path="/admin/messages" element={<AdminRoute><AdminMessages /></AdminRoute>} />
         <Route path="/admin/reports" element={<AdminRoute><AdminReports /></AdminRoute>} />
+        <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
         <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
         <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
 

@@ -2,6 +2,7 @@ import express from 'express';
 import Booking from '../models/Booking.js';
 import Program from '../models/Program.js';
 import Schedule from '../models/Schedule.js';
+import User from '../models/User.js';
 import { protect, adminOnly } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -231,6 +232,81 @@ router.delete('/programs/:id', async (req, res) => {
     const program = await Program.findByIdAndDelete(req.params.id);
     if (!program) return res.status(404).json({ success: false, error: 'Program not found' });
     res.json({ success: true, message: 'Program deleted' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ===== Manajemen Staf (akun login admin) =====
+
+// GET /api/admin/users — daftar staf
+router.get('/users', async (req, res) => {
+  try {
+    const users = await User.find().sort({ createdAt: -1 });
+    res.json({ success: true, data: users });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// POST /api/admin/users — tambah staf
+router.post('/users', async (req, res) => {
+  try {
+    const { name, email, password, role } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ success: false, error: 'Nama, email, dan password wajib diisi' });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, error: 'Password minimal 6 karakter' });
+    }
+    const exists = await User.findOne({ email: email.toLowerCase() });
+    if (exists) {
+      return res.status(400).json({ success: false, error: 'Email sudah terdaftar' });
+    }
+    const user = await User.create({ name, email, password, role: role || 'admin' });
+    const data = user.toObject();
+    delete data.password;
+    res.status(201).json({ success: true, data });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// PATCH /api/admin/users/:id — edit nama/role/aktif (atau reset password)
+router.patch('/users/:id', async (req, res) => {
+  try {
+    const { name, role, isActive, password } = req.body;
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, error: 'Staf tidak ditemukan' });
+
+    // Tidak boleh menonaktifkan akun sendiri
+    if (req.params.id === String(req.user._id) && isActive === false) {
+      return res.status(400).json({ success: false, error: 'Tidak bisa menonaktifkan akun sendiri' });
+    }
+
+    if (name !== undefined) user.name = name;
+    if (role !== undefined) user.role = role;
+    if (isActive !== undefined) user.isActive = isActive;
+    if (password) user.password = password; // akan di-hash oleh pre-save
+    await user.save();
+
+    const data = user.toObject();
+    delete data.password;
+    res.json({ success: true, data });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// DELETE /api/admin/users/:id — hapus staf
+router.delete('/users/:id', async (req, res) => {
+  try {
+    if (req.params.id === String(req.user._id)) {
+      return res.status(400).json({ success: false, error: 'Tidak bisa menghapus akun sendiri' });
+    }
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ success: false, error: 'Staf tidak ditemukan' });
+    res.json({ success: true, message: 'Staf dihapus' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

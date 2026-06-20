@@ -3,6 +3,7 @@ import AdminLayout from '../../components/admin/AdminLayout'
 import { Card } from '../../components/ui'
 import { apiFetch } from '../../utils/api'
 import { formatRupiah } from '../../utils/format'
+import { downloadCsv } from '../../utils/exportCsv'
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des']
 
@@ -23,6 +24,24 @@ export default function AdminReports() {
       .finally(() => setLoading(false))
   }
   useEffect(() => { fetchReports() }, [])
+
+  const exportRevenue = () => {
+    if (!data?.revenueByProgram?.length) return
+    downloadCsv(
+      'pendapatan-per-program.csv',
+      ['Program', 'Jumlah Booking', 'Total Pendapatan (Rp)'],
+      data.revenueByProgram.map((r) => [r.name, r.count, r.totalRevenue])
+    )
+  }
+
+  const exportCustomers = () => {
+    if (!data?.topCustomers?.length) return
+    downloadCsv(
+      'top-pelanggan.csv',
+      ['Nama', 'Email', 'Jumlah Booking', 'Total Belanja (Rp)'],
+      data.topCustomers.map((c) => [c.name, c._id, c.bookings, c.totalSpent])
+    )
+  }
 
   const inputCls = 'rounded-lg border border-outline-variant bg-surface-lowest px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30'
 
@@ -45,6 +64,13 @@ export default function AdminReports() {
           </div>
           <button onClick={fetchReports} className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-on-primary hover:bg-primary-container">
             Generate Laporan
+          </button>
+          <button
+            onClick={exportRevenue}
+            disabled={!data?.revenueByProgram?.length}
+            className="rounded-lg border border-secondary px-4 py-2 text-sm font-medium text-secondary transition-colors hover:bg-secondary-container/40 disabled:opacity-50"
+          >
+            ⬇ Export Excel
           </button>
         </Card>
 
@@ -125,8 +151,15 @@ export default function AdminReports() {
             </div>
 
             <Card padded={false} className="overflow-hidden">
-              <div className="p-6 pb-0">
+              <div className="flex items-center justify-between p-6 pb-0">
                 <h3 className="font-heading text-lg font-semibold text-on-surface">Top 5 Pelanggan</h3>
+                <button
+                  onClick={exportCustomers}
+                  disabled={!data?.topCustomers?.length}
+                  className="text-xs font-medium text-secondary hover:underline disabled:opacity-50"
+                >
+                  ⬇ Export CSV
+                </button>
               </div>
               {data?.topCustomers?.length > 0 ? (
                 <div className="mt-4 overflow-x-auto">

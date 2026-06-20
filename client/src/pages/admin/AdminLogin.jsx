@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../../utils/api'
 import { Card, Input } from '../../components/ui'
+import heroBg from '../../assets/hero-bg.webp'
 
 export default function AdminLogin() {
   const navigate = useNavigate()
@@ -31,8 +32,16 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface-low p-4">
-      <Card className="w-full max-w-md">
+    <div className="relative flex min-h-screen items-center justify-center p-4">
+      {/* Background foto farm + lapisan gelap (premium) */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${heroBg})` }}
+        aria-hidden="true"
+      />
+      <div className="absolute inset-0 bg-on-surface/70 backdrop-blur-sm" aria-hidden="true" />
+
+      <Card className="relative w-full max-w-md">
         <div className="mb-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-primary text-3xl">
             🐑
