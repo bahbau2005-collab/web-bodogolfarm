@@ -8,6 +8,10 @@ node_modules/
 .env.local
 .env.*.local
 
+# Catatan kredensial (rahasia — jangan di-commit)
+KREDENSIAL.local.md
+*.secret.md
+
 # Build output
 dist/
 build/

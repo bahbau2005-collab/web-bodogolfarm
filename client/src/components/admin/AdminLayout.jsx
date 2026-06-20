@@ -6,6 +6,7 @@ const navItems = [
   { path: '/admin/services', label: 'Layanan', icon: '🐑' },
   { path: '/admin/schedules', label: 'Jadwal & Kuota', icon: '🗓' },
   { path: '/admin/bookings', label: 'Booking', icon: '🎫' },
+  { path: '/admin/messages', label: 'Pesan Masuk', icon: '✉' },
   { path: '/admin/content', label: 'Konten', icon: '📄' },
   { path: '/admin/reports', label: 'Laporan', icon: '📈' },
   { path: '/admin/settings', label: 'Pengaturan', icon: '⚙' },

@@ -2,6 +2,7 @@ import express from 'express'
 import Booking from '../models/Booking.js'
 import Program from '../models/Program.js'
 import { snap, createPaymentParameter, formatCustomerDetails, formatItemDetails } from '../config/midtrans.js'
+import { sendMail, buildBookingEmail } from '../utils/mailer.js'
 
 const router = express.Router()
 
@@ -65,6 +66,13 @@ router.post('/create', async (req, res) => {
     booking.paymentStatus = 'pending'
     await booking.save()
 
+    // Kirim email konfirmasi booking + link pembayaran (non-blocking)
+    sendMail({
+      to: booking.customerEmail,
+      subject: `Konfirmasi Booking ${booking.ticketCode} - Bodogol Farm`,
+      html: buildBookingEmail(booking, { paid: false }),
+    })
+
     res.json({
       success: true,
       data: {
@@ -106,10 +114,11 @@ router.post('/notification', async (req, res) => {
     const bookingId = order_id.split('-')[1]
 
     // Find booking
-    const booking = await Booking.findById(bookingId)
+    const booking = await Booking.findById(bookingId).populate('program')
     if (!booking) {
       return res.status(404).json({ success: false, error: 'Booking not found' })
     }
+    const wasPaid = booking.paymentStatus === 'paid'
 
     // Update payment status based on transaction status
     let newStatus = 'pending'
@@ -142,8 +151,18 @@ router.post('/notification', async (req, res) => {
     // Update booking
     booking.paymentStatus = newStatus
     booking.paymentNotification = notification
+    if (newStatus === 'paid') booking.status = 'confirmed'
     booking.updatedAt = new Date()
     await booking.save()
+
+    // Kirim e-ticket begitu pembayaran lunas (sekali saja)
+    if (newStatus === 'paid' && !wasPaid) {
+      sendMail({
+        to: booking.customerEmail,
+        subject: `E-Ticket ${booking.ticketCode} - Pembayaran Berhasil`,
+        html: buildBookingEmail(booking, { paid: true }),
+      })
+    }
 
     res.status(200).json({ success: true })
 
