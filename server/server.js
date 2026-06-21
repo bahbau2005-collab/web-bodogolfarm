@@ -73,31 +73,32 @@ app.get('/', (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
-// Start server
-const PORT = process.env.PORT || 5000;
+// Start server — HANYA saat dijalankan langsung (lokal/Render).
+// Di Vercel (serverless) kita TIDAK listen; app diekspor sebagai handler.
+if (!process.env.VERCEL) {
+  const PORT = process.env.PORT || 5000;
 
-const server = app.listen(PORT, () => {
-  console.log(`
+  const server = app.listen(PORT, () => {
+    console.log(`
 🚀 Bodogol Farm Backend Server Started!
 📍 Running on: http://localhost:${PORT}
 🌍 Environment: ${process.env.NODE_ENV || 'development'}
 📊 Health Check: http://localhost:${PORT}/api/health
 📚 API Docs: http://localhost:${PORT}/
   `);
-});
+  });
 
-// Handle unhandled promise rejections
-process.on('unhandledRejection', (err, promise) => {
-  console.log(`Unhandled Rejection: ${err.message}`);
-  server.close(() => {
+  // Handle unhandled promise rejections
+  process.on('unhandledRejection', (err) => {
+    console.log(`Unhandled Rejection: ${err.message}`);
+    server.close(() => process.exit(1));
+  });
+
+  // Handle uncaught exceptions
+  process.on('uncaughtException', (err) => {
+    console.log(`Uncaught Exception: ${err.message}`);
     process.exit(1);
   });
-});
-
-// Handle uncaught exceptions
-process.on('uncaughtException', (err) => {
-  console.log(`Uncaught Exception: ${err.message}`);
-  process.exit(1);
-});
+}
 
 export default app;

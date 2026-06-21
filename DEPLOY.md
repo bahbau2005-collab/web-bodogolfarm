@@ -1,77 +1,77 @@
-# 🚀 Panduan Deploy — Bodogol Farm (versi demo)
+# 🚀 Panduan Deploy — Bodogol Farm (Vercel, tanpa kartu)
 
-Arsitektur deploy gratis:
-- **Database** → MongoDB Atlas (free tier)
-- **Backend** (Express) → Render (free)
+Arsitektur:
+- **Database** → MongoDB Atlas (free) — ✅ SUDAH JADI
+- **Backend** (Express serverless) → Vercel (free, tanpa kartu)
 - **Frontend** (React/Vite) → Vercel (free)
 
-> Untuk demo/sidang: pakai akun sendiri + Midtrans **sandbox**. Saat serah-terima ke client, ganti kepemilikan (lihat KREDENSIAL.local.md & checklist).
+> Dibuat 2 project Vercel terpisah dari 1 repo: `server` (backend) & `client` (frontend).
+> Untuk demo: Midtrans **sandbox**. Saat serah-terima ke client, ganti kepemilikan.
 
 ---
 
-## 1. MongoDB Atlas (database online)
-1. Daftar di https://www.mongodb.com/atlas → buat **Cluster gratis (M0)**
-2. **Database Access** → buat user DB (username + password) → catat
-3. **Network Access** → Add IP → `0.0.0.0/0` (allow from anywhere) — biar Render bisa konek
-4. **Connect → Drivers** → salin connection string:
-   `mongodb+srv://<user>:<password>@cluster.../bodogol-farm`
-5. Simpan string ini untuk env backend (`MONGODB_URI`)
+## ✅ Step 1 — MongoDB Atlas (SELESAI)
+Cluster + user + Network Access `0.0.0.0/0` + connection string (ada di `server/.env`) + data sudah di-seed.
 
-## 2. Backend → Render
-1. Daftar https://render.com → **New → Web Service** → connect repo GitHub `web-bodogolfarm`
-2. Setting:
-   - **Root Directory:** `server`
-   - **Build Command:** `npm install`
-   - **Start Command:** `npm start`
-3. **Environment Variables** (Settings → Environment):
-   ```
-   PORT=5000
-   NODE_ENV=production
-   MONGODB_URI=<connection string Atlas tadi>
-   JWT_SECRET=<string acak panjang, mis. dari KREDENSIAL.local.md>
-   JWT_EXPIRE=7d
-   CLIENT_URL=<URL Vercel frontend, isi setelah langkah 3>
-   MIDTRANS_SERVER_KEY=<sandbox server key>
-   MIDTRANS_CLIENT_KEY=<sandbox client key>
-   MIDTRANS_IS_PRODUCTION=false
-   EMAIL_HOST=smtp.gmail.com
-   EMAIL_PORT=465
-   EMAIL_USER=bodogolfarm12345@gmail.com
-   EMAIL_PASS=<app password>
-   EMAIL_FROM=Bodogol Farm <bodogolfarm12345@gmail.com>
-   ```
-4. Deploy → catat URL backend (mis. `https://bodogol-api.onrender.com`)
-5. **Seed data** (sekali): di Render Shell jalankan `npm run seed && npm run seed-schedules && npm run seed-articles && npm run seed-testimonials && npm run seed-admin`
+## Step 2 — Backend ke Vercel
+1. Login https://vercel.com (Sign in with GitHub `bahbau2005-collab`)
+2. **Add New → Project** → import repo `web-bodogolfarm`
+3. **Root Directory:** pilih **`server`** ⚠️
+4. Framework Preset: **Other** (biarkan; sudah ada `server/vercel.json`)
+5. **Environment Variables** (copy nilai rahasia dari `server/.env`):
+   | Key | Value |
+   |-----|-------|
+   | `MONGODB_URI` | *(string Atlas)* |
+   | `JWT_SECRET` | *(dari .env)* |
+   | `JWT_EXPIRE` | `7d` |
+   | `CLIENT_URL` | `http://localhost:5173` *(sementara, diupdate di Step 4)* |
+   | `MIDTRANS_SERVER_KEY` | *(dari .env)* |
+   | `MIDTRANS_CLIENT_KEY` | *(dari .env)* |
+   | `MIDTRANS_IS_PRODUCTION` | `false` |
+   | `EMAIL_HOST` | `smtp.gmail.com` |
+   | `EMAIL_PORT` | `465` |
+   | `EMAIL_USER` | `bodogolfarm12345@gmail.com` |
+   | `EMAIL_PASS` | *(app password dari .env)* |
+   | `EMAIL_FROM` | `Bodogol Farm <bodogolfarm12345@gmail.com>` |
+   > JANGAN set `PORT` (serverless tidak pakai). `VERCEL` otomatis ada.
+6. **Deploy** → catat URL backend, mis. `https://bodogol-api.vercel.app`
+7. Tes: buka `<URL backend>/api/health` → harus `{"success":true,...}`
 
-## 3. Frontend → Vercel
-1. Daftar https://vercel.com → **Add New → Project** → import repo `web-bodogolfarm`
-2. Setting:
-   - **Root Directory:** `client`
-   - Framework: Vite (auto-detect) · Build: `npm run build` · Output: `dist`
-3. **Environment Variables:**
-   ```
-   VITE_API_URL=<URL backend Render dari langkah 2>
-   ```
-4. Deploy → catat URL frontend (mis. `https://bodogol-farm.vercel.app`)
-5. **Balik ke Render** → update `CLIENT_URL` = URL Vercel ini → redeploy backend (biar CORS & redirect bayar benar)
+## Step 3 — Frontend ke Vercel
+1. **Add New → Project** → import repo **yang sama** lagi
+2. **Root Directory:** pilih **`client`** ⚠️
+3. Framework: **Vite** (auto-detect)
+4. **Environment Variables:**
+   | Key | Value |
+   |-----|-------|
+   | `VITE_API_URL` | *(URL backend dari Step 2)* |
+5. **Deploy** → catat URL frontend, mis. `https://bodogol-farm.vercel.app`
 
-## 4. Midtrans (webhook)
+## Step 4 — Sambungkan (CORS & redirect bayar)
+1. Buka project **backend** di Vercel → Settings → Environment Variables
+2. Update `CLIENT_URL` = URL frontend (Step 3)
+3. **Redeploy** backend (Deployments → ... → Redeploy)
+
+## Step 5 — Midtrans webhook
 1. Login https://dashboard.sandbox.midtrans.com
 2. **Settings → Configuration → Payment Notification URL:**
-   `<URL backend Render>/api/payments/notification`
-3. Save. Sekarang status "lunas" & email e-ticket otomatis jalan setelah pembayaran.
+   `<URL backend>/api/payments/notification`
+3. Save → status "lunas" & email e-ticket jalan otomatis setelah bayar.
 
-## 5. Cek akhir
-- [ ] Buka URL Vercel → web kebuka
-- [ ] Booking → bayar (kartu sandbox `4811 1111 1111 1114`, CVV 123, OTP 112233)
-- [ ] Setelah bayar → balik ke /payment, status benar, email e-ticket masuk
-- [ ] Login admin → data muncul
+## Step 6 — Cek akhir
+- [ ] Buka URL frontend → web tampil + data muncul
+- [ ] Booking → bayar (kartu sandbox `4811 1111 1111 1114`, CVV `123`, OTP `112233`)
+- [ ] Balik ke `/payment` → status benar + email e-ticket masuk
+- [ ] Login admin (`/admin/login`) → data tampil
 
 ---
 
-## ⚠️ Saat serah-terima ke client (go-live beneran)
-- Ganti **Midtrans** ke akun production milik Bodogol Farm + `MIDTRANS_IS_PRODUCTION=true`
-- Pindah kepemilikan Atlas/Render/Vercel/domain ke client
+## ⚠️ Catatan serverless (Vercel)
+- Cold start: request pertama setelah idle agak lambat — wajar di free tier.
+- Rate limiter in-memory kurang efektif di serverless (reset tiap cold start) — cukup untuk demo.
+
+## ⚠️ Saat serah-terima ke client (go-live)
+- Midtrans → akun production Bodogol Farm + `MIDTRANS_IS_PRODUCTION=true`
+- Pindah kepemilikan Atlas/Vercel/domain ke client
 - Ganti password admin `admin123` & email pengirim
-- Naikkan/tinjau rate limiter untuk traffic publik
-- (Opsional) pasang domain custom (mis. bodogolfarm.com) di Vercel
+- Tinjau rate limiter; pasang domain custom (mis. bodogolfarm.com) di Vercel

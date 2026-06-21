@@ -5,22 +5,34 @@ dotenv.config();
 
 /**
  * Database Configuration
- * Handles MongoDB connection using Mongoose
+ * Koneksi MongoDB via Mongoose, dengan caching agar aman di lingkungan
+ * serverless (Vercel) — koneksi dipakai ulang antar invocation, tidak
+ * bikin koneksi baru tiap request.
  */
+let cached = globalThis._mongooseConn;
+if (!cached) cached = globalThis._mongooseConn = { conn: null, promise: null };
 
 const connectDB = async () => {
-  try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI, {
-      // Modern Mongoose doesn't need these options, but keeping for compatibility
-      // useNewUrlParser: true,
-      // useUnifiedTopology: true,
-    });
+  if (cached.conn) return cached.conn;
 
-    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
-  } catch (error) {
-    console.error('❌ MongoDB Connection Error:', error.message);
-    process.exit(1);
+  if (!cached.promise) {
+    cached.promise = mongoose
+      .connect(process.env.MONGODB_URI)
+      .then((m) => {
+        console.log(`✅ MongoDB Connected: ${m.connection.host}`);
+        return m;
+      });
   }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (error) {
+    cached.promise = null;
+    console.error('❌ MongoDB Connection Error:', error.message);
+    throw error; // jangan process.exit di serverless — cukup lempar error
+  }
+
+  return cached.conn;
 };
 
 export default connectDB;
