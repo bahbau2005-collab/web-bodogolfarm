@@ -47,9 +47,11 @@ export function createPaymentParameter(orderId, amount, customerDetails, itemDet
     item_details: itemDetails,
     expiry: paymentConfig.expiry,
     callbacks: {
-      finish: `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment/success`,
-      error: `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment/error`,
-      pending: `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment/pending`
+      // Arahkan ke route /payment (Midtrans otomatis menambah &order_id=...).
+      // Status asli "lunas" tetap ditentukan webhook + dicek dari backend.
+      finish: `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment?status=success`,
+      error: `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment?status=error`,
+      pending: `${process.env.CLIENT_URL || 'http://localhost:5173'}/payment?status=pending`
     }
   }
 }
