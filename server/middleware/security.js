@@ -1,6 +1,36 @@
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import Redis from 'ioredis';
+import { RedisStore } from 'rate-limit-redis';
+
+/**
+ * Store untuk rate limiter.
+ * Kalau REDIS_URL ada (mis. Upstash) → pakai Redis (counter dibagi antar
+ * instance serverless, jadi limiter beneran efektif di Vercel).
+ * Kalau tidak ada → fallback ke MemoryStore bawaan (cukup untuk lokal).
+ * Klien Redis di-cache global agar tidak bikin koneksi baru tiap invocation.
+ */
+let redisClient = null;
+if (process.env.REDIS_URL) {
+  try {
+    redisClient = globalThis._redisClient;
+    if (!redisClient) {
+      redisClient = globalThis._redisClient = new Redis(process.env.REDIS_URL, {
+        maxRetriesPerRequest: 3,
+      });
+      redisClient.on('error', (e) => console.error('[Redis] error:', e.message));
+    }
+  } catch (e) {
+    console.error('[Redis] gagal inisialisasi, fallback ke memory:', e.message);
+    redisClient = null;
+  }
+}
+
+const makeStore = (prefix) =>
+  redisClient
+    ? new RedisStore({ sendCommand: (...args) => redisClient.call(...args), prefix })
+    : undefined;
 
 /**
  * CORS Configuration
@@ -53,7 +83,8 @@ export const limiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  skip: skipInDev
+  skip: skipInDev,
+  store: makeStore('rl:')
 });
 
 /**
@@ -68,7 +99,8 @@ export const apiLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  skip: skipInDev
+  skip: skipInDev,
+  store: makeStore('rl-api:')
 });
 
 /**
@@ -83,5 +115,6 @@ export const authLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  skip: skipInDev
+  skip: skipInDev,
+  store: makeStore('rl-auth:')
 });
