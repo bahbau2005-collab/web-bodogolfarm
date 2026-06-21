@@ -42,7 +42,9 @@ app.use(async (req, res, next) => {
     await connectDB();
     next();
   } catch (err) {
-    res.status(503).json({ success: false, error: 'Database tidak terhubung: ' + err.message });
+    // Log detail di server, jangan bocorkan ke client (cegah info disclosure)
+    console.error('[DB] Gagal konek:', err.message);
+    res.status(503).json({ success: false, error: 'Layanan sedang tidak tersedia, coba lagi.' });
   }
 });
 
