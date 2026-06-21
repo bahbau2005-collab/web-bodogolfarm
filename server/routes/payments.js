@@ -2,6 +2,7 @@ import express from 'express'
 import crypto from 'crypto'
 import Booking from '../models/Booking.js'
 import Program from '../models/Program.js'
+import Schedule from '../models/Schedule.js'
 import { snap, createPaymentParameter, formatCustomerDetails, formatItemDetails } from '../config/midtrans.js'
 import { sendMail, buildBookingEmail } from '../utils/mailer.js'
 
@@ -130,6 +131,7 @@ router.post('/notification', async (req, res) => {
       return res.status(404).json({ success: false, error: 'Booking not found' })
     }
     const wasPaid = booking.paymentStatus === 'paid'
+    const wasCancelled = booking.status === 'cancelled'
 
     // Update payment status based on transaction status
     let newStatus = 'pending'
@@ -163,8 +165,23 @@ router.post('/notification', async (req, res) => {
     booking.paymentStatus = newStatus
     booking.paymentNotification = notification
     if (newStatus === 'paid') booking.status = 'confirmed'
+
+    // Pembayaran gagal / dibatalkan / expired -> batalkan booking & lepas kuota
+    const releasing =
+      (newStatus === 'failed' || newStatus === 'cancelled') && !wasCancelled
+    if (releasing) booking.status = 'cancelled'
+
     booking.updatedAt = new Date()
     await booking.save()
+
+    // Lepas kuota sesi (sekali) saat transaksi berakhir gagal/expired
+    if (releasing && booking.schedule) {
+      const schedule = await Schedule.findById(booking.schedule)
+      if (schedule) {
+        schedule.booked = Math.max(schedule.booked - booking.participants, 0)
+        await schedule.save()
+      }
+    }
 
     // Kirim e-ticket begitu pembayaran lunas (sekali saja)
     if (newStatus === 'paid' && !wasPaid) {

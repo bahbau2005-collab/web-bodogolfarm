@@ -14,6 +14,7 @@ import contactRoutes from './routes/contact.js';
 import paymentRoutes from './routes/payments.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
+import cronRoutes from './routes/cron.js';
 // Load environment variables
 dotenv.config();
 
@@ -68,6 +69,7 @@ app.use('/api/contact', apiLimiter, contactRoutes);
 app.use('/api/payments', apiLimiter, paymentRoutes);
 app.use('/api/auth', apiLimiter, authRoutes);
 app.use('/api/admin', apiLimiter, adminRoutes);
+app.use('/api/cron', cronRoutes);
 // Welcome route
 app.get('/', (req, res) => {
   res.json({
