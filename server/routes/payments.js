@@ -1,4 +1,5 @@
 import express from 'express'
+import crypto from 'crypto'
 import Booking from '../models/Booking.js'
 import Program from '../models/Program.js'
 import { snap, createPaymentParameter, formatCustomerDetails, formatItemDetails } from '../config/midtrans.js'
@@ -104,11 +105,21 @@ router.post('/create', async (req, res) => {
 router.post('/notification', async (req, res) => {
   try {
     const notification = req.body
+    const { order_id, transaction_status, fraud_status, status_code, gross_amount, signature_key } = notification
 
-    // Verify notification signature (recommended for production)
-    // const isValid = verifyNotificationSignature(notification)
-
-    const { order_id, transaction_status, fraud_status } = notification
+    // Verifikasi signature Midtrans (WAJIB) — cegah orang memalsukan notifikasi
+    // "lunas". signature_key = sha512(order_id + status_code + gross_amount + serverKey)
+    const serverKey = process.env.MIDTRANS_SERVER_KEY
+    if (serverKey) {
+      const expected = crypto
+        .createHash('sha512')
+        .update(`${order_id}${status_code}${gross_amount}${serverKey}`)
+        .digest('hex')
+      if (expected !== signature_key) {
+        console.warn('[Midtrans] Signature notifikasi TIDAK valid, ditolak. order_id:', order_id)
+        return res.status(403).json({ success: false, error: 'Invalid signature' })
+      }
+    }
 
     // Extract booking ID from order_id
     const bookingId = order_id.split('-')[1]

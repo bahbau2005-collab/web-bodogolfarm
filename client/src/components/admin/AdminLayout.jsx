@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import {
   IconDashboard, IconServices, IconSchedule, IconBookings, IconMessages,
-  IconContent, IconReports, IconUsers, IconSettings, IconLogout, IconBell, IconTractor,
+  IconContent, IconReports, IconUsers, IconSettings, IconLogout, IconBell, IconTractor, IconTestimonial,
 } from '../icons'
 
 const navItems = [
@@ -12,6 +12,7 @@ const navItems = [
   { path: '/admin/bookings', label: 'Booking', Icon: IconBookings },
   { path: '/admin/messages', label: 'Pesan Masuk', Icon: IconMessages },
   { path: '/admin/content', label: 'Konten', Icon: IconContent },
+  { path: '/admin/testimonials', label: 'Testimoni', Icon: IconTestimonial },
   { path: '/admin/reports', label: 'Laporan', Icon: IconReports },
   { path: '/admin/users', label: 'Kelola Staf', Icon: IconUsers },
   { path: '/admin/settings', label: 'Pengaturan', Icon: IconSettings },

@@ -91,9 +91,11 @@ router.get('/bookings', async (req, res) => {
     if (status) filter.status = status;
     if (paymentStatus) filter.paymentStatus = paymentStatus;
     if (search) {
+      // Escape karakter regex agar input user tidak jadi pola berbahaya (ReDoS)
+      const safe = String(search).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       filter.$or = [
-        { customerName: { $regex: search, $options: 'i' } },
-        { customerEmail: { $regex: search, $options: 'i' } }
+        { customerName: { $regex: safe, $options: 'i' } },
+        { customerEmail: { $regex: safe, $options: 'i' } }
       ];
     }
 

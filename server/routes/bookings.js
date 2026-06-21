@@ -128,17 +128,26 @@ router.post('/', [
     });
   }
 
-  // Calculate total amount
+  // Calculate total amount (selalu dihitung server, JANGAN percaya nilai dari client)
   const totalAmount = program.price * totalParticipants;
 
-  // Create booking
+  // Create booking — hanya field yang diizinkan (whitelist).
+  // paymentStatus, ticketCode, totalAmount, dll TIDAK diambil dari req.body
+  // agar user tidak bisa menandai booking "paid" sendiri.
   const booking = await Booking.create({
-    ...req.body,
+    program: programId,
+    schedule: scheduleId || undefined,
+    customerName: req.body.customerName,
+    customerEmail: req.body.customerEmail,
+    customerPhone: req.body.customerPhone,
+    specialRequests: req.body.specialRequests || '',
+    bookingDate,
     participants: totalParticipants,
     adults,
     children,
     totalAmount,
-    status: 'pending'
+    status: 'pending',
+    paymentStatus: 'pending'
   });
 
   // Kurangi kuota sesi setelah booking dibuat

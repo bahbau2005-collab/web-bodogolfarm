@@ -11,6 +11,7 @@
     "seed-admin": "node data/seedAdmin.js",
     "seed-schedules": "node data/seedSchedules.js",
     "seed-articles": "node data/seedArticles.js",
+    "seed-testimonials": "node data/seedTestimonials.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

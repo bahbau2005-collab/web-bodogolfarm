@@ -62,6 +62,13 @@ export const IconContent = (p) => (
   </Svg>
 )
 
+export const IconTestimonial = (p) => (
+  <Svg {...p}>
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2Z" />
+    <path d="m9 10 1.5-2L12 10M13.5 10 15 8l1.5 2" />
+  </Svg>
+)
+
 export const IconReports = (p) => (
   <Svg {...p}>
     <path d="M3 3v18h18" />

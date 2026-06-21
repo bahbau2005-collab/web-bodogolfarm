@@ -1,24 +1,25 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { PILLARS, PROGRAMS, TESTIMONIALS } from '../utils/constants'
+import { PILLARS, PROGRAMS } from '../utils/constants'
 import HeroSection from '../components/HeroSection'
 import { Card } from '../components/ui'
 import { formatRupiah } from '../utils/format'
 import { programImage } from '../utils/programImages'
-import peternakPria from '../assets/peternak-pemula-pria.webp'
-import guruWanita from '../assets/guru-wanita.webp'
-import pengusahaPria from '../assets/pengusaha-pria.webp'
-
-const TESTIMONIAL_AVATARS = {
-  testi_001: peternakPria,
-  testi_002: guruWanita,
-  testi_003: pengusahaPria,
-}
+import { apiFetch } from '../utils/api'
 
 /**
  * Home — halaman utama. Section: Hero, Tentang singkat, 6 Pilar,
  * Preview Program, Testimoni, CTA Booking. Memakai design system.
  */
 export default function Home() {
+  const [testimonials, setTestimonials] = useState([])
+
+  useEffect(() => {
+    apiFetch('/api/testimonials')
+      .then((res) => setTestimonials(res.data || []))
+      .catch(() => setTestimonials([]))
+  }, [])
+
   return (
     <div className="w-full">
       <HeroSection />
@@ -117,36 +118,42 @@ export default function Home() {
       </section>
 
       {/* Testimoni */}
-      <section className="py-20">
-        <div className="mx-auto max-w-[1280px] px-6">
-          <h2 className="text-center font-heading text-3xl font-bold text-on-surface">
-            Testimoni Peserta
-          </h2>
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {TESTIMONIALS.map((t) => (
-              <Card key={t.id}>
-                <p className="text-on-surface">“{t.text}”</p>
-                <div className="mt-4 text-sm text-amber-500">
-                  {'★'.repeat(t.rating)}
-                </div>
-                <div className="mt-3 flex items-center gap-3">
-                  {TESTIMONIAL_AVATARS[t.id] && (
-                    <img
-                      src={TESTIMONIAL_AVATARS[t.id]}
-                      alt={t.name}
-                      className="h-11 w-11 rounded-full object-cover"
-                    />
-                  )}
-                  <div>
-                    <p className="font-semibold text-on-surface">{t.name}</p>
-                    <p className="text-sm text-on-surface-variant">{t.role}</p>
+      {testimonials.length > 0 && (
+        <section className="py-20">
+          <div className="mx-auto max-w-[1280px] px-6">
+            <h2 className="text-center font-heading text-3xl font-bold text-on-surface">
+              Testimoni Peserta
+            </h2>
+            <div className="mt-12 grid gap-6 md:grid-cols-3">
+              {testimonials.map((t) => (
+                <Card key={t._id}>
+                  <p className="text-on-surface">“{t.text}”</p>
+                  <div className="mt-4 text-sm text-amber-500">
+                    {'★'.repeat(t.rating || 5)}
                   </div>
-                </div>
-              </Card>
-            ))}
+                  <div className="mt-3 flex items-center gap-3">
+                    {t.image ? (
+                      <img
+                        src={t.image}
+                        alt={t.name}
+                        className="h-11 w-11 rounded-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-sm font-semibold text-on-primary">
+                        {t.name.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-semibold text-on-surface">{t.name}</p>
+                      <p className="text-sm text-on-surface-variant">{t.role}</p>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* CTA Booking */}
       <section className="bg-primary py-20">
