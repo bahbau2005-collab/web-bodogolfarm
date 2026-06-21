@@ -100,7 +100,17 @@ function ETicket({ booking }) {
 }
 
 /** Status non-sukses: pending / gagal / batal */
-function StatusCard({ status, orderId, payUrl }) {
+function StatusCard({ status, orderId, payUrl, bookingId }) {
+  const cancelBooking = async () => {
+    if (!confirm('Batalkan booking ini? Kuota akan dilepas dan booking tidak bisa dilanjutkan.')) return
+    try {
+      await apiFetch(`/api/bookings/${bookingId}/cancel`, { method: 'PATCH' })
+      window.location.reload()
+    } catch (e) {
+      alert('Gagal membatalkan: ' + e.message)
+    }
+  }
+
   const cfg = {
     pending: {
       tone: 'warning', icon: '⏳', title: 'Menunggu Pembayaran',
@@ -165,6 +175,14 @@ function StatusCard({ status, orderId, payUrl }) {
           >
             Hubungi Kami
           </Link>
+          {status === 'pending' && bookingId && (
+            <button
+              onClick={cancelBooking}
+              className="mt-1 text-sm font-medium text-danger hover:underline"
+            >
+              Batalkan Booking
+            </button>
+          )}
         </div>
       </Card>
     </div>
@@ -213,7 +231,7 @@ export default function PaymentStatus() {
       {view === 'success' ? (
         <ETicket booking={booking} />
       ) : (
-        <StatusCard status={view} orderId={orderId} payUrl={booking?.paymentUrl} />
+        <StatusCard status={view} orderId={orderId} payUrl={booking?.paymentUrl} bookingId={bookingId} />
       )}
       <p className="mt-10 text-center text-xs text-on-surface-variant">
         Pertanyaan?{' '}

@@ -167,6 +167,44 @@ router.post('/', [
 }));
 
 /**
+ * @route   PATCH /api/bookings/:id/cancel
+ * @desc    Pembatalan oleh user — hanya untuk booking yang BELUM dibayar.
+ *          Mengembalikan kuota sesi. Booking yang sudah lunas tidak bisa
+ *          dibatalkan lewat sini (harus hubungi admin).
+ * @access  Public
+ */
+router.patch('/:id/cancel', asyncHandler(async (req, res) => {
+  const booking = await Booking.findById(req.params.id);
+  if (!booking) {
+    return res.status(404).json({ success: false, error: 'Booking tidak ditemukan' });
+  }
+  if (booking.paymentStatus === 'paid') {
+    return res.status(400).json({
+      success: false,
+      error: 'Booking sudah dibayar — silakan hubungi admin untuk pembatalan/refund.'
+    });
+  }
+  if (booking.status === 'cancelled') {
+    return res.json({ success: true, message: 'Booking sudah dibatalkan' });
+  }
+
+  booking.status = 'cancelled';
+  booking.paymentStatus = 'cancelled';
+  await booking.save();
+
+  // Kembalikan kuota sesi
+  if (booking.schedule) {
+    const schedule = await Schedule.findById(booking.schedule);
+    if (schedule) {
+      schedule.booked = Math.max(schedule.booked - booking.participants, 0);
+      await schedule.save();
+    }
+  }
+
+  res.json({ success: true, message: 'Booking dibatalkan' });
+}));
+
+/**
  * @route   PUT /api/bookings/:id
  * @desc    Update booking status (Admin only - will add auth later)
  * @access  Private/Admin
