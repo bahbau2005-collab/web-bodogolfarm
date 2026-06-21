@@ -100,7 +100,7 @@ function ETicket({ booking }) {
 }
 
 /** Status non-sukses: pending / gagal / batal */
-function StatusCard({ status, orderId }) {
+function StatusCard({ status, orderId, payUrl }) {
   const cfg = {
     pending: {
       tone: 'warning', icon: '⏳', title: 'Menunggu Pembayaran',
@@ -135,17 +135,26 @@ function StatusCard({ status, orderId }) {
           <p className="mt-3 text-xs text-on-surface-variant">Order ID: {orderId}</p>
         )}
         <div className="mt-6 flex flex-col gap-3">
+          {/* Lanjutkan ke Midtrans (resume transaksi yang sama) — utama saat pending */}
+          {status === 'pending' && payUrl && (
+            <a
+              href={payUrl}
+              className="rounded-lg bg-primary py-3 text-sm font-medium text-on-primary transition-colors hover:bg-primary-container"
+            >
+              Lanjutkan Pembayaran
+            </a>
+          )}
           {cfg.primary.href ? (
             <Link
               to={cfg.primary.href}
-              className="rounded-lg bg-primary py-3 text-sm font-medium text-on-primary transition-colors hover:bg-primary-container"
+              className="rounded-lg bg-surface-container py-3 text-sm font-medium text-on-surface-variant transition-colors hover:bg-surface-high"
             >
               {cfg.primary.text}
             </Link>
           ) : (
             <button
               onClick={() => window.location.reload()}
-              className="rounded-lg bg-primary py-3 text-sm font-medium text-on-primary transition-colors hover:bg-primary-container"
+              className="rounded-lg bg-surface-container py-3 text-sm font-medium text-on-surface-variant transition-colors hover:bg-surface-high"
             >
               {cfg.primary.text}
             </button>
@@ -204,7 +213,7 @@ export default function PaymentStatus() {
       {view === 'success' ? (
         <ETicket booking={booking} />
       ) : (
-        <StatusCard status={view} orderId={orderId} />
+        <StatusCard status={view} orderId={orderId} payUrl={booking?.paymentUrl} />
       )}
       <p className="mt-10 text-center text-xs text-on-surface-variant">
         Pertanyaan?{' '}
