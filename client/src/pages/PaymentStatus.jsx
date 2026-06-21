@@ -104,8 +104,8 @@ function StatusCard({ status, orderId }) {
   const cfg = {
     pending: {
       tone: 'warning', icon: '⏳', title: 'Menunggu Pembayaran',
-      msg: 'Selesaikan pembayaran Anda. Konfirmasi akan dikirim via email setelah pembayaran diterima.',
-      primary: { text: 'Cek Status Booking', href: '/booking' },
+      msg: 'Pembayaran belum selesai. Jika Anda baru saja membayar, tunggu beberapa saat lalu muat ulang halaman ini — status akan otomatis diperbarui.',
+      primary: { text: 'Muat Ulang Status', href: '' },
     },
     error: {
       tone: 'danger', icon: '✕', title: 'Pembayaran Gagal',
@@ -135,12 +135,21 @@ function StatusCard({ status, orderId }) {
           <p className="mt-3 text-xs text-on-surface-variant">Order ID: {orderId}</p>
         )}
         <div className="mt-6 flex flex-col gap-3">
-          <Link
-            to={cfg.primary.href}
-            className="rounded-lg bg-primary py-3 text-sm font-medium text-on-primary transition-colors hover:bg-primary-container"
-          >
-            {cfg.primary.text}
-          </Link>
+          {cfg.primary.href ? (
+            <Link
+              to={cfg.primary.href}
+              className="rounded-lg bg-primary py-3 text-sm font-medium text-on-primary transition-colors hover:bg-primary-container"
+            >
+              {cfg.primary.text}
+            </Link>
+          ) : (
+            <button
+              onClick={() => window.location.reload()}
+              className="rounded-lg bg-primary py-3 text-sm font-medium text-on-primary transition-colors hover:bg-primary-container"
+            >
+              {cfg.primary.text}
+            </button>
+          )}
           <Link
             to="/contact"
             className="rounded-lg bg-surface-container py-3 text-sm font-medium text-on-surface-variant transition-colors hover:bg-surface-high"
@@ -153,12 +162,21 @@ function StatusCard({ status, orderId }) {
   )
 }
 
+// Status pembayaran asli (dari DB) -> tampilan
+const PAYMENT_VIEW = {
+  paid: 'success',
+  pending: 'pending',
+  challenge: 'pending',
+  unknown: 'pending',
+  failed: 'error',
+  cancelled: 'cancel',
+}
+
 export default function PaymentStatus() {
   const [searchParams] = useSearchParams()
   const [booking, setBooking] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  const status = searchParams.get('status') || 'success'
   const orderId = searchParams.get('order_id')
   const bookingId = orderId ? orderId.split('-')[1] : null
 
@@ -177,12 +195,16 @@ export default function PaymentStatus() {
     return <div className="py-32 text-center text-on-surface-variant">Memuat status…</div>
   }
 
+  // Sumber kebenaran = status pembayaran di database (bukan parameter URL),
+  // supaya tidak menampilkan "Lunas" kalau sebenarnya belum dibayar.
+  const view = PAYMENT_VIEW[booking?.paymentStatus] || 'pending'
+
   return (
     <div className="min-h-screen bg-surface-low px-6 py-16">
-      {status === 'success' ? (
+      {view === 'success' ? (
         <ETicket booking={booking} />
       ) : (
-        <StatusCard status={status} orderId={orderId} />
+        <StatusCard status={view} orderId={orderId} />
       )}
       <p className="mt-10 text-center text-xs text-on-surface-variant">
         Pertanyaan?{' '}
