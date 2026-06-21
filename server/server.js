@@ -17,7 +17,7 @@ import adminRoutes from './routes/admin.js';
 // Load environment variables
 dotenv.config();
 
-// Connect to database
+// Mulai koneksi database (cached)
 connectDB();
 
 // Initialize Express app
@@ -33,6 +33,18 @@ app.use(limiter);
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Pastikan koneksi DB siap sebelum menangani request DB (penting untuk serverless).
+// Endpoint /api/health dilewati agar tetap bisa dicek walau DB bermasalah.
+app.use(async (req, res, next) => {
+  if (req.path === '/api/health' || req.path === '/') return next();
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    res.status(503).json({ success: false, error: 'Database tidak terhubung: ' + err.message });
+  }
+});
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
